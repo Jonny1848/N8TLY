@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "scheme": "n8tly",
+    "name": "N8TLY_App",
+    "slug": "N8TLY_App",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "infoPlist": {
+          "NSLocationWhenInUseUsageDescription": "Diese App benötigt deinen Standort, um Events in deiner Nähe anzuzeigen."
+      },
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.N8TLY-App",
+      "associatedDomains": [
+        "applinks:n8tly.app"
+      ]
+    },
+    "android": {
+      "package": "com.anonymous.N8TLY-App",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "n8tly",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-video",
+      "expo-audio"
+    ]
+  }
+}

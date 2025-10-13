@@ -1,0 +1,3 @@
+// components/ui/gluestack-ui-provider/config.ts
+export { config } from '@gluestack-ui/config';
+

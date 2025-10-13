@@ -1,0 +1,11 @@
+{
+	"Wrap with View": {
+	  "prefix": "wrapview",
+	  "body": [
+		"<View className=\"${1:flex}\">",
+		"\t${TM_SELECTED_TEXT}",
+		"</View>"
+	  ],
+	  "description": "Wrap selection with <View>"
+	}
+  }
