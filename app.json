@@ -15,16 +15,25 @@
     },
     "ios": {
       "infoPlist": {
-          "NSLocationWhenInUseUsageDescription": "Diese App benötigt deinen Standort, um Events in deiner Nähe anzuzeigen."
+        "NSLocationWhenInUseUsageDescription": "Diese App benötigt deinen Standort, um Events in deiner Nähe anzuzeigen.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.N8TLY-App",
+      "bundleIdentifier": "com.anonymous.n8tlyapp",
       "associatedDomains": [
+        "applinks:n8tly.app",
         "applinks:n8tly.app"
       ]
     },
     "android": {
-      "package": "com.anonymous.N8TLY-App",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.anonymous.n8tlyapp",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -40,7 +49,10 @@
               "pathPrefix": "/callback"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "edgeToEdgeEnabled": true
@@ -51,7 +63,20 @@
     "plugins": [
       "expo-router",
       "expo-video",
-      "expo-audio"
-    ]
+      "expo-audio",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox",
+          "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c91253ed-f61e-4bf6-a3ea-e2b57d559545"
+      }
+    }
   }
 }
