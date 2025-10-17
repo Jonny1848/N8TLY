@@ -1,14 +1,16 @@
-import { View, TouchableOpacity } from 'react-native';
-import { 
-  MapPin, 
-  Calendar, 
-  MessageCircle, 
-  Compass, 
-  User,
-  House,
-  Home,
-  Plus
-} from 'lucide-react-native';
+import { View } from 'react-native';
+// Solid Icons (wenn fokussiert)
+import { HomeIcon as HomeIconSolid } from 'react-native-heroicons/solid';
+import { CalendarIcon as CalendarIconSolid } from 'react-native-heroicons/solid';
+import { ChatBubbleLeftIcon as ChatBubbleLeftIconSolid } from 'react-native-heroicons/solid';
+import { GlobeAltIcon as GlobeAltIconSolid } from 'react-native-heroicons/solid';
+import { UserIcon as UserIconSolid } from 'react-native-heroicons/solid';
+// Outline Icons (wenn nicht fokussiert)
+import { HomeIcon as HomeIconOutline } from 'react-native-heroicons/outline';
+import { CalendarIcon as CalendarIconOutline } from 'react-native-heroicons/outline';
+import { ChatBubbleLeftIcon as ChatBubbleLeftIconOutline } from 'react-native-heroicons/outline';
+import { GlobeAltIcon as GlobeAltIconOutline } from 'react-native-heroicons/outline';
+import { UserIcon as UserIconOutline } from 'react-native-heroicons/outline';
 import { theme } from '../../constants/theme';
 import {Tabs} from "expo-router"
 
@@ -32,6 +34,9 @@ export default function TabLayout() {
           fontWeight: '600',
           marginTop: 4,
         },
+        // Animationen für Tab-Wechsel
+        animation: 'shift',
+        // Alternativen: 'fade' | 'slide_from_right' | 'slide_from_left' | 'slide_from_bottom' | 'fade_from_bottom' | 'simple_push'
       }}
     >
       <Tabs.Screen
@@ -39,13 +44,11 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              backgroundColor: focused ? `${theme.colors.primary.main}15` : 'transparent',
-              borderRadius: 12,
-              padding: 8,
-            }}>
-              <House size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+            focused ? (
+              <HomeIconSolid size={24} color={color} />
+            ) : (
+              <HomeIconOutline size={24} color={color} />
+            )
           ),
         }}
       />
@@ -54,13 +57,11 @@ export default function TabLayout() {
         options={{
           title: 'Events',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              backgroundColor: focused ? `${theme.colors.primary.main}15` : 'transparent',
-              borderRadius: 12,
-              padding: 8,
-            }}>
-              <Calendar size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+            focused ? (
+              <CalendarIconSolid size={24} color={color} />
+            ) : (
+              <CalendarIconOutline size={24} color={color} />
+            )
           ),
         }}
       />
@@ -70,13 +71,11 @@ export default function TabLayout() {
           title: 'Chats',
           tabBarBadge: 2,
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              backgroundColor: focused ? `${theme.colors.primary.main}15` : 'transparent',
-              borderRadius: 12,
-              padding: 8,
-            }}>
-              <MessageCircle size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+            focused ? (
+              <ChatBubbleLeftIconSolid size={24} color={color} />
+            ) : (
+              <ChatBubbleLeftIconOutline size={24} color={color} />
+            )
           ),
         }}
       />
@@ -85,13 +84,11 @@ export default function TabLayout() {
         options={{
           title: 'Discover',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              backgroundColor: focused ? `${theme.colors.primary.main}15` : 'transparent',
-              borderRadius: 12,
-              padding: 8,
-            }}>
-              <Compass size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+            focused ? (
+              <GlobeAltIconSolid size={24} color={color} />
+            ) : (
+              <GlobeAltIconOutline size={24} color={color} />
+            )
           ),
         }}
       />
@@ -100,13 +97,11 @@ export default function TabLayout() {
         options={{
           title: 'Profil',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              backgroundColor: focused ? `${theme.colors.primary.main}15` : 'transparent',
-              borderRadius: 12,
-              padding: 8,
-            }}>
-              <User size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+            focused ? (
+              <UserIconSolid size={24} color={color} />
+            ) : (
+              <UserIconOutline size={24} color={color} />
+            )
           ),
         }}
       />

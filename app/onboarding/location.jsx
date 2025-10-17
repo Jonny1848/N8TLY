@@ -2,7 +2,7 @@ import { View, Text, Pressable, ScrollView, Image } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, MapPin, Locate, Shield } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, MapPin, Shield } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import * as Location from "expo-location";
 
@@ -10,23 +10,15 @@ export default function Locations() {
   const router = useRouter();
   const { profileData, updateProfileData } = useOnboarding();
   const [locationEnabled, setLocationEnabled] = useState(profileData.locationEnabled ?? false);
-  const [location,setLocation] = useState(null);
 
-  const requestLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setErrorMsg("Zugriff auf Standort wurde verweigert.");
-      Alert.alert("Fehler", "Bitte Standortfreigabe aktivieren.");
-      return;
+  const handleNext = async () => {
+    // Nur Permission abfragen, wenn aktiviert
+    if (locationEnabled) {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      console.log('[ONBOARDING] Location permission status:', status);
     }
-    
-    const currentLocation = await Location.getCurrentPositionAsync({});
-    console.log("Aktuelle Position:", currentLocation);
 
-    setLocation(currentLocation);
-  };
-
-  const handleNext = () => {
+    // Speichere nur die Preference
     updateProfileData({ locationEnabled });
     router.push('/onboarding/avatar');
   };
@@ -165,12 +157,7 @@ export default function Locations() {
 
           {/* Weiter Button */}
           <Pressable
-            onPress={() => {
-              if(locationEnabled){
-                requestLocation();
-              }
-              handleNext();
-            }}
+            onPress={handleNext}
             style={{ backgroundColor: theme.colors.primary.main }}
             className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
           >

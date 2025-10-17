@@ -1,78 +1,270 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, Platform, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
-import { MapPin, SlidersHorizontal, Locate } from 'lucide-react-native';
+import { useState, useRef, useEffect } from 'react';
+import { AdjustmentsHorizontalIcon } from 'react-native-heroicons/solid';
+import { MapPinIcon } from 'react-native-heroicons/solid';
+import { MagnifyingGlassIcon } from 'react-native-heroicons/solid';
 import { theme } from '../../constants/theme';
 import MapboxGL from "@rnmapbox/maps";
+import * as Location from 'expo-location';
+
+
+
+const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
 
 MapboxGL.setAccessToken("sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ");
 
 
 export default function HomeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const cameraRef = useRef<MapboxGL.Camera>(null);
+
+  // BERLIN Fallback für Simulator
+  const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
+
+  // Live-Location beim Mount
+  useEffect(() => {
+    let locationSubscription: Location.LocationSubscription | null = null;
+
+    const startLocationTracking = async () => {
+      try {
+        // Permission prüfen
+        const { status } = await Location.getForegroundPermissionsAsync();
+        
+        if (status !== 'granted') {
+          console.log('[LOCATION] Permission nicht gewährt, nutze Berlin als Fallback');
+          setUserLocation(BERLIN_COORDS);
+          setLocationError('Location permission not granted');
+          return;
+        }
+
+        // Erste Position abrufen
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        const coords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+
+        console.log('[LOCATION] Aktueller Standort:', coords);
+        
+        // Prüfe ob es Simulator-Default ist (San Francisco)
+        if (Math.abs(coords.latitude - 37.785834) < 0.001 &&
+            Math.abs(coords.longitude + 122.406417) < 0.001) {
+          console.log('[LOCATION] Simulator-Default erkannt, nutze Berlin');
+          setUserLocation(BERLIN_COORDS);
+        } else {
+          setUserLocation(coords);
+        }
+
+        // Live-Updates starten
+        locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced,
+            distanceInterval: 50, // Update alle 50 Meter
+          },
+          (newLocation) => {
+            const newCoords = {
+              latitude: newLocation.coords.latitude,
+              longitude: newLocation.coords.longitude,
+            };
+            console.log('[LOCATION] Position update:', newCoords);
+            setUserLocation(newCoords);
+          }
+        );
+      } catch (error) {
+        console.error('[LOCATION] Fehler beim Abrufen:', error);
+        setUserLocation(BERLIN_COORDS);
+        setLocationError('Failed to get location');
+      }
+    };
+
+    startLocationTracking();
+
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
+  }, []);
+
+  const handleLocatePress = () => {
+    if (cameraRef.current && userLocation) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [userLocation.longitude, userLocation.latitude],
+        zoomLevel: 15,
+        animationDuration: 1000,
+      });
+    }
+  };
+
+  const searchCity = async (cityName: string) => {
+    if (!cityName.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cityName)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=place&limit=1`
+      );
+      
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [longitude, latitude] = data.features[0].center;
+        const placeName = data.features[0].place_name;
+        
+        console.log('[SEARCH] Gefunden:', placeName, { latitude, longitude });
+        
+        if (cameraRef.current) {
+          cameraRef.current.setCamera({
+            centerCoordinate: [longitude, latitude],
+            zoomLevel: 12,
+            animationDuration: 1500,
+          });
+        }
+        
+        Keyboard.dismiss();
+      } else {
+        console.log('[SEARCH] Keine Ergebnisse für:', cityName);
+      }
+    } catch (error) {
+      console.error('[SEARCH] Fehler:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      searchCity(searchQuery);
+      setSearchExpanded(false);
+      setSearchQuery('');
+    }
+  };
+
+  const toggleSearch = () => {
+    setSearchExpanded(!searchExpanded);
+    if (searchExpanded) {
+      setSearchQuery('');
+    }
+  };
 
   return (
-    <View className="flex-1 bg-white">
-      {/* Minimalistischer Header */}
-      <SafeAreaView edges={['top']} className="bg-white w-full h-44">
-        <View className="flex-row justify-between items-center px-5 py-2">
-          {/* Logo */}
-          <View className="flex-row items-center">
-            <Image 
-              source={require("../../assets/N8T4.png")} 
-              className="w-40 h-40" 
+    <View className="flex-1">
+      {/* Fullscreen Map */}
+        <MapboxGL.MapView
+          style={{ flex: 1 }}
+          styleURL="mapbox://styles/mapbox/standard" //standard
+          logoEnabled={false}
+          attributionEnabled={false}
+          compassEnabled={false}
+          compassViewPosition={3}
+          compassViewMargins={{ x: 20, y: 100 }}
+        >
+          <MapboxGL.Camera
+            ref={cameraRef}
+            zoomLevel={14}
+            centerCoordinate={
+              userLocation
+                ? [userLocation.longitude, userLocation.latitude]
+                : [13.404954, 52.520008] // Berlin als Fallback
+            }
+            animationMode="flyTo"
+            animationDuration={1000}
+          />
+          
+          <MapboxGL.UserLocation
+            visible={true}
+            showsUserHeadingIndicator={true}
+            minDisplacement={10}
+          />
+        </MapboxGL.MapView>
+
+      {/* Overlay Elemente */}
+      <SafeAreaView edges={['top']} className="absolute top-0 left-0 right-0" style={{ zIndex: 10 }}>
+        <View className="px-5 pt-2">
+          <View className="flex-row">
+            {/* Logo */}
+            <Image
+              source={require("../../assets/N8T4.png")}
+              className="w-28 h-28 "
               resizeMode="contain"
             />
+            
+            {/* Action Buttons */}
+            <View className="flex-row gap-3">
+              {/* Search Button */}
+              <Pressable
+                className="w-12 h-12 rounded-2xl justify-center items-center shadow-lg"
+                style={{ backgroundColor: theme.colors.neutral.white }}
+                onPress={toggleSearch}
+              >
+                <MagnifyingGlassIcon
+                  size={24}
+                  color={theme.colors.primary.main}
+                />
+              </Pressable>
+              
+              {/* Filter Button */}
+              <Pressable
+                className="w-12 h-12 rounded-2xl justify-center items-center shadow-lg"
+                style={{ backgroundColor: theme.colors.primary.light }}
+                onPress={() => setFilterVisible(!filterVisible)}
+              >
+                <AdjustmentsHorizontalIcon
+                  size={24}
+                  color={theme.colors.primary.main}
+                />
+              </Pressable>
+            </View>
           </View>
-          
-          {/* Rechts: Filter Button */}
-          <Pressable 
-            className="w-12 h-12 rounded-2xl justify-center items-center"
-            style={{ backgroundColor: `${theme.colors.primary.main}15` }}
-            onPress={() => setFilterVisible(!filterVisible)}
-          >
-            <SlidersHorizontal 
-              size={24} 
-              color={theme.colors.primary.main} 
-              strokeWidth={2.5}
-            />
-          </Pressable>
+
+          {/* Expandable Search Field */}
+          {searchExpanded && (
+            <View className="mt-3 bg-white rounded-2xl shadow-lg px-4 py-3">
+              <View className="flex-row items-center">
+                <MagnifyingGlassIcon size={20} color={theme.colors.neutral.gray[500]} />
+                <TextInput
+                  className="flex-1 ml-3 text-base text-gray-900"
+                  placeholder="Stadt suchen (z.B. Düsseldorf)..."
+                  placeholderTextColor={theme.colors.neutral.gray[400]}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={handleSearchSubmit}
+                  returnKeyType="search"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  autoFocus={true}
+                />
+                {isSearching && (
+                  <Text className="text-sm ml-2" style={{ color: theme.colors.primary.main }}>
+                    ...
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
         </View>
       </SafeAreaView>
 
-      {/* Map Container - Fullscreen */}
-      <View className="flex-1 relative">
-        {/* TODO: Mapbox Map wird hier eingebaut sobald Build-Probleme gelöst sind */}
-        <View className="flex-1 bg-gray-50">
-          <View className="flex-1 justify-center items-center px-10">
-            <MapPin size={64} color={theme.colors.primary.main} strokeWidth={1.5} />
-            <Text className="text-lg font-semibold text-gray-900 mt-4 text-center">
-              Map-Placeholder
-            </Text>
-            <Text className="text-sm text-gray-600 mt-2 text-center">
-              Zuerst müssen wir die App zum Laufen bringen
-            </Text>
-          </View>
-        </View>
-
-        {/* Location Button - Unten rechts */}
-        <View className="absolute bottom-24 right-5">
-          <Pressable 
-            className="w-14 h-14 rounded-full justify-center items-center shadow-lg"
-            style={{ backgroundColor: theme.colors.primary.main }}
-          >
-            <Locate size={26} color="#fff" strokeWidth={2.5} />
-          </Pressable>
-        </View>
-
-        {/* Event Preview Card - Unten (optional, kann später aktiviert werden) */}
-        {/* <View className="absolute bottom-0 left-0 right-0 px-4 pb-24">
-          <View className="bg-white rounded-3xl p-4 shadow-xl">
-            <Text className="text-base font-bold text-gray-900">Event Name</Text>
-            <Text className="text-sm text-gray-600 mt-1">Location • Distance</Text>
-          </View>
-        </View> */}
+      {/* Location Button - Unten rechts */}
+      <View className="absolute bottom-24 right-5" style={{ zIndex: 10 }}>
+        <Pressable
+          className="w-14 h-14 rounded-full justify-center items-center shadow-lg"
+          style={{ backgroundColor: theme.colors.primary.main }}
+          onPress={handleLocatePress}
+        >
+          <MapPinIcon size={26} color="#fff" />
+        </Pressable>
       </View>
+
 
       {/* Filter Panel - Slide-in von rechts */}
       {filterVisible && (

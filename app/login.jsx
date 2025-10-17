@@ -35,17 +35,23 @@ export default function Login() {
   const handleSubmit = async () => {
     setLoading(true);
     setErrorMsg("");
-    console.log({ emailValid, passwordValid, email, password,submitted });
+    console.log('[LOGIN] Starting login...', { emailValid, passwordValid });
+    
     if (emailValid && passwordValid) {
       setSubmitted(true);
-      console.log("Im Anmeldebutton");
-      const{ data, error} = await supabase.auth.signInWithPassword({
-        email,password
+      console.log('[LOGIN] Credentials valid, calling Supabase...');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
+      
       setSubmitted(false);
       
       if (error) {
-        console.log(error);
+        console.error('[LOGIN] Error:', error);
+        setLoading(false);
+        
         if (error.message.includes('Invalid login credentials')) {
           setErrorMsg('Falsche E-Mail oder Passwort.');
         } else if (error.message.includes('Email not confirmed')) {
@@ -55,9 +61,17 @@ export default function Login() {
         }
         return;
       }
-      else {
-        setLoading(false);
-      }
+      
+      // Erfolgreicher Login
+      console.log('[LOGIN] Login successful, session:', data.session?.user?.email);
+      setLoading(false);
+      
+      // Navigation wird durch _layout.tsx Auth-Listener gehandhabt
+      // Warte kurz damit der Listener reagieren kann
+      console.log('[LOGIN] Waiting for auth state change handler...');
+    } else {
+      setLoading(false);
+      setSubmitted(true);
     }
   };
 

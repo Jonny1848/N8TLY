@@ -36,9 +36,13 @@ export default function ProfileScreen() {
   ];
 
   const handleLogout = async () => {
+    console.log('[LOGOUT] Starting logout process...');
     const { error } = await supabase.auth.signOut();
-    if (error) console.error('Fehler beim Logout:', error);
-    else console.log('[AUTH] User erfolgreich abgemeldet');
+    if (error) {
+      console.error('[LOGOUT] Fehler beim Logout:', error);
+    } else {
+      console.log('[LOGOUT] signOut successful, waiting for auth state change...');
+    }
   };
 
   return (

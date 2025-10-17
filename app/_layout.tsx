@@ -38,13 +38,16 @@ function RootLayoutContent() {
 
       // 2) EVENTS: zukünftige Änderungen behandeln (ohne Doppelaufrufe)
       const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log(event);
+        console.log('[AUTH] Event:', event, 'Pathname:', pathname);
         if (!bootstrappedRef.current) return;
 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (session) await handleAuthenticated(session);
         } else if (event === 'SIGNED_OUT') {
-          safeReplace('/login');
+          console.log('[AUTH] SIGNED_OUT detected, navigating to login');
+          // Reset navigation state und navigiere zurück
+          navigatingRef.current = null;
+          router.replace('/login');
         }
       });
       unsub = () => data?.subscription?.unsubscribe?.();
@@ -54,8 +57,13 @@ function RootLayoutContent() {
   }, [introCompleted]);
 
   function safeReplace(target: string) {
-    if (navigatingRef.current === target || pathname === target) return;
+    console.log('[NAV] safeReplace called:', { target, current: navigatingRef.current, pathname });
+    if (navigatingRef.current === target || pathname === target) {
+      console.log('[NAV] Navigation blocked - already navigating or already at target');
+      return;
+    }
     navigatingRef.current = target;
+    console.log('[NAV] Executing router.replace to:', target);
     router.replace(target);
     setTimeout(() => (navigatingRef.current = null), 80);
   }
