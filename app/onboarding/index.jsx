@@ -62,14 +62,14 @@ export default function Onboarding() {
                 action="secondary"
                 onPress={handleClose}
                 size="sm"
-                className ="rounded-lg px-4 py-3 bg-slate border-spacing-0 animate-spin"
+                className ="rounded-lg px-4 py-3  border-spacing-0 animate-spin border-2"
               >
                 <Text>Abbrechen</Text>
               </Pressable>
               <Pressable 
                 size="sm" 
                 onPress={() => {handleLogout();handleClose();}}
-                className ="rounded-lg px-5 py-3 "
+                className =" border-spacing-0 border-2 rounded-lg  ml-2 px-5 py-3 "
               >
                 <Text>Ja</Text>
               </Pressable>

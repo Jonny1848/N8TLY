@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, MapPin, Locate, Shield } from 'lucide-react-nati
 import { theme } from '../../constants/theme';
 import * as Location from "expo-location";
 
-export default function Location() {
+export default function Locations() {
   const router = useRouter();
   const { profileData, updateProfileData } = useOnboarding();
   const [locationEnabled, setLocationEnabled] = useState(profileData.locationEnabled ?? false);
@@ -165,7 +165,12 @@ export default function Location() {
 
           {/* Weiter Button */}
           <Pressable
-            onPress={handleNext}
+            onPress={() => {
+              if(locationEnabled){
+                requestLocation();
+              }
+              handleNext();
+            }}
             style={{ backgroundColor: theme.colors.primary.main }}
             className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
           >

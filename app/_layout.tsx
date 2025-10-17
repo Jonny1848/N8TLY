@@ -81,7 +81,7 @@ function RootLayoutContent() {
       if (!profile || !profile.onboarding_completed) {
         safeReplace('/onboarding');
       } else {
-        safeReplace('/home');
+        safeReplace('/tabs');
       }
     } finally {
       handlingAuthRef.current = false;

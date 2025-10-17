@@ -21,7 +21,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.n8tlyapp",
       "associatedDomains": [
-        "applinks:n8tly.app",
         "applinks:n8tly.app"
       ]
     },
@@ -54,8 +53,7 @@
             "DEFAULT"
           ]
         }
-      ],
-      "edgeToEdgeEnabled": true
+      ]
     },
     "web": {
       "bundler": "metro"
@@ -67,12 +65,12 @@
       [
         "@rnmapbox/maps",
         {
-          "RNMapboxMapsImpl": "mapbox",
-          "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ"
+          "RNMapboxMapsImpl": "mapbox"
         }
       ]
     ],
     "extra": {
+      "MAPBOX_PUBLIC_TOKEN": "pk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3NlNjgzcTEyZXIyanM0NDc2NG03d2gifQ.fLZwL-HnCDqELHLwX3jPfw",
       "router": {},
       "eas": {
         "projectId": "c91253ed-f61e-4bf6-a3ea-e2b57d559545"
