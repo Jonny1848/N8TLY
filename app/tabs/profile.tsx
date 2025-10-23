@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  User, 
-  Settings, 
+import {
+  User,
+  Settings,
   Ticket,
   Heart,
   MapPin,
@@ -227,7 +227,7 @@ export default function ProfileScreen() {
 
         {/* Bottom Spacing */}
         <View className="h-5" />
-      </ScrollView>
+    </ScrollView>
     </SafeAreaView>
   );
 }
