@@ -5,6 +5,7 @@ import { MapPinIcon, MagnifyingGlassIcon, MicrophoneIcon, AdjustmentsHorizontalI
 import { theme } from '../../constants/theme';
 import MapboxGL from "@rnmapbox/maps";
 import * as Location from 'expo-location';
+import { useAudioPlayer } from 'expo-audio';
 import { FilterBottomSheet } from '../../components/FilterBottomSheet';
 
 const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
@@ -16,6 +17,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
   const cameraRef = useRef<MapboxGL.Camera>(null);
+  const flightPlayer = useAudioPlayer(require('../../assets/flight.mp3'));
 
   // BERLIN Fallback für Simulator
   const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
@@ -84,8 +86,18 @@ export default function HomeScreen() {
     };
   }, []);
 
+  const playFlightSound = () => {
+    try {
+      flightPlayer.seekTo(0);
+      flightPlayer.play();
+    } catch (error) {
+      console.error('[SOUND] Fehler beim Abspielen:', error);
+    }
+  };
+
   const handleLocatePress = () => {
     if (cameraRef.current && userLocation) {
+      playFlightSound();
       cameraRef.current.setCamera({
         centerCoordinate: [userLocation.longitude, userLocation.latitude],
         zoomLevel: 15,
@@ -108,6 +120,7 @@ export default function HomeScreen() {
         const [longitude, latitude] = data.features[0].center;
         
         if (cameraRef.current) {
+          playFlightSound();
           cameraRef.current.setCamera({
             centerCoordinate: [longitude, latitude],
             zoomLevel: 12,
@@ -141,7 +154,7 @@ export default function HomeScreen() {
               ? [userLocation.longitude, userLocation.latitude]
               : [13.404954, 52.520008]
           }
-          animationMode="flyTo"
+          animationMode="easeTo"
           animationDuration={1000}
         />
         
