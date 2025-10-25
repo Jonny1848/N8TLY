@@ -1,7 +1,9 @@
 import { View, Text, Pressable, Image, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect } from 'react';
-import { MapPinIcon, MagnifyingGlassIcon, MicrophoneIcon, AdjustmentsHorizontalIcon } from 'react-native-heroicons/solid';
+import { MapPinIcon, MagnifyingGlassIcon, MicrophoneIcon } from 'react-native-heroicons/solid';
+import { AdjustmentsHorizontalIcon as AdjustmentsHorizontalIconSolid } from 'react-native-heroicons/solid';
+import { AdjustmentsHorizontalIcon as AdjustmentsHorizontalIconOutline } from 'react-native-heroicons/outline';
 import { theme } from '../../constants/theme';
 import MapboxGL from "@rnmapbox/maps";
 import * as Location from 'expo-location';
@@ -16,6 +18,7 @@ export default function HomeScreen() {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
+  const [filterActive, setFilterActive] = useState(false);
   const cameraRef = useRef<MapboxGL.Camera>(null);
   const flightPlayer = useAudioPlayer(require('../../assets/flight.mp3'));
 
@@ -135,6 +138,14 @@ export default function HomeScreen() {
     }
   };
 
+  const handleFilterApply = () => {
+    setFilterActive(true);
+  };
+
+  const handleFilterReset = () => {
+    setFilterActive(false);
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Fullscreen Map */}
@@ -154,7 +165,7 @@ export default function HomeScreen() {
               ? [userLocation.longitude, userLocation.latitude]
               : [13.404954, 52.520008]
           }
-          animationMode="easeTo"
+          animationMode="flyTo"
           animationDuration={1000}
         />
         
@@ -181,13 +192,24 @@ export default function HomeScreen() {
         <View className="p-5 pt-6">
           <Pressable
             className="w-12 h-12 rounded-2xl justify-center items-center shadow-lg"
-            style={{ backgroundColor: theme.colors.neutral.gray[100] }}
+            style={{
+              backgroundColor: filterActive && !filterVisible
+                ? theme.colors.primary.main
+                : theme.colors.neutral.gray[100]
+            }}
             onPress={() => setFilterVisible(true)}
           >
-            <AdjustmentsHorizontalIcon
-              size={24}
-              color={theme.colors.primary.main}
-            />
+            {filterActive && !filterVisible ? (
+              <AdjustmentsHorizontalIconSolid
+                size={24}
+                color="white"
+              />
+            ) : (
+              <AdjustmentsHorizontalIconOutline
+                size={24}
+                color={theme.colors.primary.main}
+              />
+            )}
           </Pressable>
         </View>
       </SafeAreaView>
@@ -203,10 +225,10 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Suchleiste am unteren Rand - über Bottom Tab */}
-      <SafeAreaView edges={['bottom']} className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl" style={{ zIndex: 5 }}>
-        <View className="px-5 pt-3 pb-1">
-          <View className="flex-row items-center bg-gray-100 rounded-full px-5 py-4 shadow-lg space-x-10">
+      {/* Suchleiste schwebend über der Karte */}
+      <SafeAreaView edges={['bottom']} className="absolute bottom-0 left-0 right-0" style={{ zIndex: 5 }}>
+        <View className="px-5 pb-2 mb-1">
+          <View className="flex-row items-center bg-white rounded-full px-5 py-4 shadow-xl space-x-10">
             <MagnifyingGlassIcon size={22} color={theme.colors.neutral.gray[500]} />
             <TextInput
               className="flex-1 ml-3 text-base text-gray-900"
@@ -230,6 +252,8 @@ export default function HomeScreen() {
       <FilterBottomSheet
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
+        onApply={handleFilterApply}
+        onReset={handleFilterReset}
       />
     </View>
   );

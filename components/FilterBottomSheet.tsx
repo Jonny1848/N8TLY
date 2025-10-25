@@ -51,9 +51,11 @@ const MUSIC_GENRES = [
 interface FilterBottomSheetProps {
   visible: boolean;
   onClose: () => void;
+  onApply?: () => void;
+  onReset?: () => void;
 }
 
-export function FilterBottomSheet({ visible, onClose }: FilterBottomSheetProps) {
+export function FilterBottomSheet({ visible, onClose, onApply, onReset }: FilterBottomSheetProps) {
   const [radius, setRadius] = useState(10);
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedMusicGenres, setSelectedMusicGenres] = useState<string[]>([]);
@@ -103,6 +105,7 @@ export function FilterBottomSheet({ visible, onClose }: FilterBottomSheetProps) 
     setRadius(10);
     setSelectedEventTypes([]);
     setSelectedMusicGenres([]);
+    onReset?.();
   };
 
   const handleApply = () => {
@@ -111,6 +114,7 @@ export function FilterBottomSheet({ visible, onClose }: FilterBottomSheetProps) 
       eventTypes: selectedEventTypes,
       musicGenres: selectedMusicGenres,
     });
+    onApply?.();
     handleClose();
   };
 
