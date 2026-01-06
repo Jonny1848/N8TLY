@@ -8,8 +8,6 @@ import { theme } from '../../constants/theme';
 const PARTY_PREFERENCES = [
   { id: 'clubs', name: 'Clubs', emoji: '🪩' },
   { id: 'bars', name: 'Bars', emoji: '🍸' },
-  { id: 'festivals', name: 'Festivals', emoji: '🎪' },
-  { id: 'concerts', name: 'Konzerte', emoji: '🎤' },
   { id: 'raves', name: 'Raves', emoji: '🌈' },
   { id: 'beach_party', name: 'Beach Party', emoji: '🏖️' },
   { id: 'rooftop', name: 'Rooftop', emoji: '🏙️' },

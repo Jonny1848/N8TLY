@@ -31,14 +31,6 @@ const iconMap: Record<string, { solid: any; outline: any }> = {
   profile: { solid: UserIconSolid, outline: UserIconOutline },
 };
 
-const tabLabels: Record<string, string> = {
-  home: 'Home',
-  events: 'Events',
-  social: 'Chats',
-  discover: 'Discover',
-  profile: 'Profil',
-};
-
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View style={styles.tabBar}>
@@ -97,7 +89,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
           ? theme.colors.primary.main 
           : theme.colors.neutral.gray[400];
 
-        const badge = route.name === 'social' ? 2 : undefined;
+        const badge = route.name === 'social' ? 3 : undefined;
 
         return (
           <TouchableOpacity
@@ -118,14 +110,6 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                   </View>
                 )}
               </Animated.View>
-              <Text
-                style={[
-                  styles.tabLabel,
-                  { color, fontWeight: isFocused ? '600' : '400' },
-                ]}
-              >
-                {tabLabels[route.name] || route.name}
-              </Text>
             </Animated.View>
           </TouchableOpacity>
         );
@@ -137,11 +121,9 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: theme.colors.neutral.white,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.neutral.gray[200],
-    height: 85,
-    paddingBottom: 25,
+    backgroundColor: "white",
+    height: 65,
+    paddingBottom: 20,
     paddingTop: 10,
   },
   tabItem: {
@@ -172,9 +154,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 11,
     fontWeight: '600',
-  },
-  tabLabel: {
-    fontSize: 11,
-    marginTop: 4,
   },
 });

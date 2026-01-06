@@ -11,6 +11,7 @@ export const theme = {
       lighter: '#6B7280',   // Helles Grau
       dark: '#111827',      // Sehr dunkles Grau
       bg: '#F9FAFB',        // Sehr heller Hintergrund
+      main2: '#191970'       // Midnight Blue
     },
     // Sekundäre Farben: Hellere Grautöne
     secondary: {

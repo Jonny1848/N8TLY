@@ -7,45 +7,43 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Slider from '@react-native-community/slider';
+import { Slider } from '@miblanchard/react-native-slider';
 import { theme } from '../constants/theme';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Event Types aus Onboarding
 const EVENT_TYPES = [
-  { id: 'clubs', name: 'Clubs', emoji: '🪩' },
-  { id: 'bars', name: 'Bars', emoji: '🍸' },
-  { id: 'festivals', name: 'Festivals', emoji: '🎪' },
-  { id: 'concerts', name: 'Konzerte', emoji: '🎤' },
-  { id: 'raves', name: 'Raves', emoji: '🌈' },
-  { id: 'beach_party', name: 'Beach Party', emoji: '🏖️' },
-  { id: 'rooftop', name: 'Rooftop', emoji: '🏙️' },
-  { id: 'underground', name: 'Underground', emoji: '🕳️' },
-  { id: 'open_air', name: 'Open Air', emoji: '🌳' },
-  { id: 'house_party', name: 'House Party', emoji: '🏠' },
-  { id: 'boat_party', name: 'Boat Party', emoji: '⛵' },
-  { id: 'warehouse', name: 'Warehouse', emoji: '🏭' },
+  { id: 'clubs', name: 'Clubs' },
+  { id: 'bars', name: 'Bars' },
+  { id: 'raves', name: 'Raves' },
+  { id: 'beach_party', name: 'Beach Party' },
+  { id: 'rooftop', name: 'Rooftop' },
+  { id: 'underground', name: 'Underground' },
+  { id: 'open_air', name: 'Open Air' },
+  { id: 'house_party', name: 'House Party' },
+  { id: 'boat_party', name: 'Boat Party' },
+  { id: 'warehouse', name: 'Warehouse' },
 ];
 
 // Music Genres aus Onboarding
 const MUSIC_GENRES = [
-  { id: 'techno', name: 'Techno', emoji: '🎧' },
-  { id: 'house', name: 'House', emoji: '🏠' },
-  { id: 'hiphop', name: 'Hip-Hop', emoji: '🎤' },
-  { id: 'rnb', name: 'R&B', emoji: '🎵' },
-  { id: 'pop', name: 'Pop', emoji: '🎶' },
-  { id: 'rock', name: 'Rock', emoji: '🎸' },
-  { id: 'indie', name: 'Indie', emoji: '🎹' },
-  { id: 'edm', name: 'EDM', emoji: '💥' },
-  { id: 'trap', name: 'Trap', emoji: '🔥' },
-  { id: 'dnb', name: 'Drum & Bass', emoji: '⚡' },
-  { id: 'trance', name: 'Trance', emoji: '🌌' },
-  { id: 'reggaeton', name: 'Reggaeton', emoji: '🌴' },
-  { id: 'afrobeats', name: 'Afrobeats', emoji: '🌍' },
-  { id: 'schlager', name: 'Schlager', emoji: '🍺' },
-  { id: 'latin', name: 'Latin', emoji: '💃' },
-  { id: 'jazz', name: 'Jazz', emoji: '🎺' },
+  { id: 'techno', name: 'Techno' },
+  { id: 'house', name: 'House' },
+  { id: 'hiphop', name: 'Hip-Hop' },
+  { id: 'rnb', name: 'R&B' },
+  { id: 'pop', name: 'Pop' },
+  { id: 'rock', name: 'Rock' },
+  { id: 'indie', name: 'Indie' },
+  { id: 'edm', name: 'EDM' },
+  { id: 'trap', name: 'Trap' },
+  { id: 'dnb', name: 'Drum & Bass' },
+  { id: 'trance', name: 'Trance' },
+  { id: 'reggaeton', name: 'Reggaeton' },
+  { id: 'afrobeats', name: 'Afrobeats' },
+  { id: 'schlager', name: 'Schlager' },
+  { id: 'latin', name: 'Latin' },
+  { id: 'jazz', name: 'Jazz' },
 ];
 
 interface FilterBottomSheetProps {
@@ -151,15 +149,15 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
               <View style={styles.sliderContainer}>
                 <View style={styles.sliderWrapper}>
                   <Slider
-                    style={styles.slider}
                     minimumValue={5}
                     maximumValue={50}
                     step={5}
-                    value={radius}
-                    onValueChange={setRadius}
+                    value={[radius]}
+                    onValueChange={(values: number[]) => setRadius(values[0])}
                     minimumTrackTintColor={theme.colors.primary.main}
                     maximumTrackTintColor={theme.colors.neutral.gray[300]}
                     thumbTintColor={theme.colors.primary.main}
+                    containerStyle={styles.slider}
                   />
                 </View>
                 <View style={styles.radiusLabels}>
@@ -173,11 +171,7 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
             {/* Event Types */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Event Type</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalScrollContent}
-              >
+              <View style={styles.gridContainer}>
                 {EVENT_TYPES.map((type) => {
                   const isSelected = selectedEventTypes.includes(type.id);
                   return (
@@ -189,7 +183,6 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
                         isSelected && styles.cardSelected,
                       ]}
                     >
-                      <Text style={styles.cardEmoji}>{type.emoji}</Text>
                       <Text
                         style={[
                           styles.cardText,
@@ -201,17 +194,13 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
                     </Pressable>
                   );
                 })}
-              </ScrollView>
+              </View>
             </View>
 
             {/* Music Genres */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Music Type</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalScrollContent}
-              >
+              <View style={styles.gridContainer}>
                 {MUSIC_GENRES.map((genre) => {
                   const isSelected = selectedMusicGenres.includes(genre.id);
                   return (
@@ -223,7 +212,6 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
                         isSelected && styles.cardSelected,
                       ]}
                     >
-                      <Text style={styles.cardEmoji}>{genre.emoji}</Text>
                       <Text
                         style={[
                           styles.cardText,
@@ -235,7 +223,7 @@ export function FilterBottomSheet({ visible, onClose, onApply, onReset }: Filter
                     </Pressable>
                   );
                 })}
-              </ScrollView>
+              </View>
             </View>
 
           {/* Bottom spacing */}
@@ -347,28 +335,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.neutral.gray[500],
   },
-  horizontalScrollContent: {
-    paddingRight: 20,
-    gap: 12,
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   card: {
-    width: 100,
-    height: 100,
+    minWidth: 80,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
     backgroundColor: theme.colors.neutral.gray[100],
+    borderWidth: 1,
+    borderColor: theme.colors.neutral.gray[300],
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
   },
   cardSelected: {
     backgroundColor: theme.colors.primary.main,
-  },
-  cardEmoji: {
-    fontSize: 36,
-    marginBottom: 8,
+    borderColor: theme.colors.primary.main,
   },
   cardText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: theme.colors.neutral.gray[700],
     textAlign: 'center',
