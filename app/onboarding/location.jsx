@@ -38,7 +38,7 @@ export default function Locations() {
             </Pressable>
 
             <Image
-              source={require("../../assets/N8T4.png")}
+              source={require("../../assets/N8LY9.png")}
               className="w-24 h-24"
               resizeMode="contain"
             />
