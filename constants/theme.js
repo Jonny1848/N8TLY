@@ -6,7 +6,7 @@ export const theme = {
   colors: {
     // Primäre Farben: Grautöne für professionelles Erscheinungsbild
     primary: {
-      main: '#1F2937',      // Dunkles Grau - Hauptfarbe
+      main: '#0066FF',      // Electric Blue - Hauptfarbe (N8LY Logo Color)
       light: '#374151',     // Mittleres Grau
       lighter: '#6B7280',   // Helles Grau
       dark: '#111827',      // Sehr dunkles Grau

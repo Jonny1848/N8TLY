@@ -82,7 +82,7 @@ export default function Onboarding() {
       {/* Oben: Logo + Texte */}
       <View className="flex-1 justify-center items-center">
         <View className="relative mb-8">
-          <Image source={require("../../assets/N8T4.png")} className="w-48 h-48" />
+          <Image source={require("../../assets/N8LY9.png")} className="w-48 h-48" />
         </View>
         
         <Text
