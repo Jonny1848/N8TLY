@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
 
   // ============================
-  // 🔥 Nutzerposition holen
+  // Nutzerposition holen
   // ============================
   useEffect(() => {
     let sub: Location.LocationSubscription | null = null;
@@ -203,6 +203,15 @@ export default function HomeScreen() {
           </MapboxGL.PointAnnotation>
         ))}
       </MapboxGL.MapView>
+
+      {/* Logo zentral oben */}
+      <SafeAreaView edges={['top']} className="absolute top-0 left-0 right-0 items-center pt-1" style={{ zIndex: 10 }}>
+        <Image
+          source={require('../../assets/N8LY9.png')}
+          style={{ width: 140, height: 140 }}
+          resizeMode="contain"
+        />
+      </SafeAreaView>
 
       {/* Filter */}
       <SafeAreaView edges={['top']} className="absolute top-0 right-0" style={{ zIndex: 10 }}>

@@ -1,10 +1,30 @@
+/**
+ * Root Layout – Auth-Routing & Control Flow
+ *
+ * CONTROL FLOW:
+ * 1) BOOTSTRAP (App-Start/Reload):
+ *    getSession() → bei Session: handleAuthenticated(session) → Profil via Supabase Client → /tabs oder /onboarding
+ *    ohne Session: /login
+ *
+ * 2) E-Mail-Login (login.jsx):
+ *    signInWithPassword() → onAuthStateChange(SIGNED_IN) → handleAuthenticated(session, 'SIGNED_IN')
+ *    → Profil via fetchProfileWithToken → Navigation
+ *
+ * 3) Google OAuth – zwei Einstiegspunkte:
+ *    A) login.jsx: WebBrowser öffnet, User kehrt zurück → setSession() → fetchProfileWithToken() → setOauthRedirectTo → <Redirect>
+ *    B) auth/callback: Deep-Link n8tly://auth/callback → setSession() → fetchProfileWithToken() → router.replace()
+ *    Zusätzlich: onAuthStateChange(SIGNED_IN) → handleAuthenticated(session, 'SIGNED_IN') → fetchProfileWithToken() → safeReplace()
+ *
+ * WICHTIG (OAuth): Der Supabase-Client sendet den JWT manchmal nicht mit der ersten Anfrage nach setSession.
+ * Daher nutzen wir fetchProfileWithToken(access_token) für direkte REST-API-Abfragen – umgeht RLS/auth.uid()-Probleme.
+ */
 // app/_layout.jsx
 import 'react-native-url-polyfill/auto';
 import 'react-native-get-random-values';
 import { Slot, useRouter, usePathname, Stack } from 'expo-router';
 import { GluestackUIProvider } from '../components/ui/gluestack-ui-provider';
-import { supabase } from '../lib/supabase';
-import { useEffect, useRef } from 'react';
+import { supabase, fetchProfileWithToken } from '../lib/supabase';
+import { useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native'
 import { IntroProvider, useIntro } from '../components/IntroContext';
 import { OnboardingProvider } from '../components/OnboardingContext';
@@ -13,11 +33,21 @@ function RootLayoutContent() {
   const router = useRouter();
   const pathname = usePathname();
   const { introCompleted } = useIntro();
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   // verhindert Doppelnavigation & parallele handleAuthenticated-Läufe
   const navigatingRef = useRef<string | null>(null);
   const handlingAuthRef = useRef(false);
   const bootstrappedRef = useRef(false);
+
+  // State-based redirect: runs in React lifecycle, works after OAuth WebBrowser returns
+  useEffect(() => {
+    if (!pendingRedirect || pathname === pendingRedirect) return;
+    console.log('[NAV] Executing pending redirect to:', pendingRedirect);
+    router.replace(pendingRedirect);
+    setPendingRedirect(null);
+    setTimeout(() => (navigatingRef.current = null), 100);
+  }, [pendingRedirect, pathname]);
 
   useEffect(() => {
     // Warte bis Intro abgeschlossen ist
@@ -42,12 +72,11 @@ function RootLayoutContent() {
         if (!bootstrappedRef.current) return;
 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (session) await handleAuthenticated(session);
+          if (session) await handleAuthenticated(session, event);
         } else if (event === 'SIGNED_OUT') {
           console.log('[AUTH] SIGNED_OUT detected, navigating to login');
-          // Reset navigation state und navigiere zurück
           navigatingRef.current = null;
-          router.replace('/login');
+          setPendingRedirect('/login');
         }
       });
       unsub = () => data?.subscription?.unsubscribe?.();
@@ -63,34 +92,46 @@ function RootLayoutContent() {
       return;
     }
     navigatingRef.current = target;
-    console.log('[NAV] Executing router.replace to:', target);
-    router.replace(target);
-    setTimeout(() => (navigatingRef.current = null), 80);
+    // Use state to trigger redirect - ensures it runs in React lifecycle (fixes OAuth redirect)
+    setPendingRedirect(target);
   }
 
-  async function handleAuthenticated(session: any) {
-    if (handlingAuthRef.current) return; // Guard gegen parallele Aufrufe
+  async function handleAuthenticated(session: any, event?: string) {
+    if (handlingAuthRef.current) return;
     handlingAuthRef.current = true;
     try {
-      const uid = session.user.id;
-      // robuste Query (Fehler sichtbar machen)
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', uid)
-        .maybeSingle();
-
-      if (error) {
-        // Fallback: Onboarding starten (z. B. wenn Profil noch fehlt)
+      const uid = session?.user?.id;
+      if (!uid) {
         safeReplace('/onboarding');
         return;
       }
+      console.log('[AUTH] PreSupabase Auth Check');
 
-      if (!profile || !profile.onboarding_completed) {
-        safeReplace('/onboarding');
+      // OAuth (SIGNED_IN): fetchProfileWithToken – Supabase Client sendet JWT oft nicht mit erster Anfrage
+      let profile: { onboarding_completed?: boolean } | null;
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        profile = await fetchProfileWithToken(session.access_token, uid);
+        console.log('[AUTH] Profil-Abfrage (OAuth mit Token):', profile);
       } else {
-        safeReplace('/tabs');
+        const { data, error: profileError } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', uid)
+          .maybeSingle();
+        profile = data ?? null;
+        console.log('[AUTH] Profil-Abfrage (Supabase Client):', { profile, profileError });
       }
+      console.log('[AUTH] : Post Supabase Auth Check');
+      const onboardingComplete = profile?.onboarding_completed === true;
+
+      if (onboardingComplete) {
+        safeReplace('/tabs');
+      } else {
+        safeReplace('/onboarding');
+      }
+    } catch (err) {
+      console.error('[AUTH] handleAuthenticated error:', err);
+      safeReplace('/onboarding');
     } finally {
       handlingAuthRef.current = false;
     }

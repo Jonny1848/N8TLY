@@ -1,69 +1,45 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Image } from "react-native";
 import { useIntro } from '../components/IntroContext';
-import React, { useEffect, useRef } from "react";
-import { useVideoPlayer, VideoView } from "expo-video";
-import { useAudioPlayer } from "expo-audio";
-import { router } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import 'react-native-url-polyfill/auto';
+import { theme } from '../constants/theme';
 
+/**
+ * Intro/LogoScreen – Logo einblenden, dann Übergang.
+ * Navigiert NICHT zu /login – _layout übernimmt das Routing nach Auth-Check.
+ */
 export default function LogoScreen() {
-  const audioplayer1 = useAudioPlayer(require("../assets/Introsound.mp3"));
   const { setIntroCompleted } = useIntro();
-  const hasNavigatedRef = useRef(false);
-  
-  const handleNavigation = () => {
-    if (!hasNavigatedRef.current) {
-      hasNavigatedRef.current = true;
-      console.log('[INTRO] Setting introCompleted to true');
+  const hasCompletedRef = useRef(false);
+  const [showLoading, setShowLoading] = useState(false);
+
+  const handleIntroComplete = () => {
+    if (!hasCompletedRef.current) {
+      hasCompletedRef.current = true;
+      console.log('[INTRO] Intro abgeschlossen – _layout übernimmt Routing');
       setIntroCompleted(true);
-      console.log('[INTRO] Navigating to login');
-      router.replace("/login");
+      setShowLoading(true);
     }
   };
 
-  const player = useVideoPlayer(require("../assets/N8T.mp4"), (p) => {
-    p.muted = false;
-    p.play();
-    audioplayer1.play?.();
-    
-    // Video-Ende-Events
-    p.addListener('playingChange', (isPlaying) => {
-      console.log('[INTRO] Playing state changed:', isPlaying);
-      if (!isPlaying && p.currentTime > 0 && Math.abs(p.currentTime - p.duration) < 0.5) {
-        console.log('[INTRO] Video ended via playingChange');
-        handleNavigation();
-      }
-    });
-
-    p.addListener('statusChange', (status) => {
-      console.log('[INTRO] Status changed:', status.status);
-      if (status.status === 'idle' && p.currentTime > 0) {
-        console.log('[INTRO] Video ended via statusChange');
-        handleNavigation();
-      }
-    });
-  });
-
-  // Fallback-Timer als Sicherheit
   useEffect(() => {
-    const fallbackTimer = setTimeout(() => {
-      console.log('[INTRO] Fallback timer triggered');
-      handleNavigation();
-    }, 5000); // 5 Sekunden Fallback
-
-    return () => clearTimeout(fallbackTimer);
+    const timer = setTimeout(handleIntroComplete, 3000); // Logo 1,5s anzeigen
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <View style={styles.container}>
-      <VideoView
-        style={styles.video}
-        player={player}
-        contentFit="cover"
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
-        nativeControls={false}
-      />
+      {showLoading ? (
+        <View style={[StyleSheet.absoluteFill, styles.loadingOverlay]}>
+          <ActivityIndicator size="large" color={theme.colors.primary.main} />
+        </View>
+      ) : (
+        <Image
+          source={require("../assets/N8LY9.png")}
+          style={styles.logo}
+          resizeMode="fill"
+        />
+      )}
     </View>
   );
 }
@@ -75,8 +51,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
-  video: {
-    width: 300,
-    height: 300,
+  logo: {
+    width: 160,
+    height: 160,
+  },
+  loadingOverlay: {
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

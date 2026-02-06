@@ -1,7 +1,16 @@
-import { View, Text, Pressable, Image, ActivityIndicator, ScrollView, TextInput, TouchableOpacity } from "react-native";
+/**
+ * Login Screen – E-Mail/Passwort & Google OAuth
+ *
+ * Google OAuth Flow:
+ * 1. signInWithOAuth() → WebBrowser öffnet
+ * 2. User authentifiziert → Redirect n8tly://auth/callback#access_token=...
+ * 3. WebBrowser schließt, Promise liefert result.url
+ * 4. setSession() → fetchProfileWithToken() → setOauthRedirectTo → <Redirect href={target} />
+ */
+import { View, Text, Pressable, Image, ActivityIndicator, ScrollView, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useState } from "react";
-import { useRouter } from 'expo-router';
-import { supabase } from "../lib/supabase";
+import { useRouter, Redirect } from 'expo-router';
+import { supabase, fetchProfileWithToken } from "../lib/supabase";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from 'expo-web-browser';
 import { theme } from "../constants/theme";
@@ -21,7 +30,24 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
+  const [oauthRedirectTo, setOauthRedirectTo] = useState(null);
+  const [oauthProcessing, setOauthProcessing] = useState(false);
   const router = useRouter();
+
+  // Deklarativer Redirect nach OAuth - läuft im Render-Zyklus, zuverlässiger als router.replace
+  if (oauthRedirectTo) {
+    return <Redirect href={oauthRedirectTo} />;
+  }
+
+  // OAuth-Overlay: Login-Form verstecken, bis Weiterleitung – verhindert kurzes Aufblitzen des Login-Screens
+  if (oauthProcessing) {
+    return (
+      <View style={styles.oauthOverlay}>
+        <ActivityIndicator size="large" color={theme.colors.primary.main} />
+        <Text style={styles.oauthOverlayText}>Anmeldung wird verarbeitet...</Text>
+      </View>
+    );
+  }
 
   const emailValid = /\S+@\S+\.\S+/.test(email);
   const passwordValid = password.length >= 6;
@@ -122,23 +148,39 @@ export default function Login() {
 
       if (result.type === 'success' && result.url) {
         console.log("[AUTH] OAuth successful, URL:", result.url);
+        setOauthProcessing(true); // Sofort Overlay – Login-Screen nicht mehr sichtbar
 
         const url = new URL(result.url);
-        const access_token = url.searchParams.get('access_token');
-        const refresh_token = url.searchParams.get('refresh_token');
+        // Supabase OAuth returns tokens in the hash fragment (#), not query params (?)
+        const hashParams = url.hash ? new URLSearchParams(url.hash.substring(1)) : null;
+        const getParam = (name) => hashParams?.get(name) ?? url.searchParams.get(name);
+        const access_token = getParam('access_token');
+        const refresh_token = getParam('refresh_token');
 
         if (access_token && refresh_token) {
-          const { error: sessionError } = await supabase.auth.setSession({
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
             access_token,
             refresh_token,
           });
 
           if (sessionError) {
             console.error("[AUTH] Session Error:", sessionError);
+            setOauthProcessing(false);
             setErrorMsg('Fehler beim Setzen der Session');
           } else {
-            console.log("[AUTH] Session successfully set");
+            // Google OAuth: Profil mit access_token direkt abfragen (siehe fetchProfileWithToken)
+            const uid = sessionData?.session?.user?.id;
+            const accessToken = sessionData?.session?.access_token;
+            const profile = accessToken
+              ? await fetchProfileWithToken(accessToken, uid)
+              : (await supabase.from('profiles').select('onboarding_completed').eq('id', uid).maybeSingle()).data;
+            const target = profile?.onboarding_completed ? '/tabs' : '/onboarding';
+            setOauthRedirectTo(target);
           }
+        } else {
+          console.error("[AUTH] No tokens in redirect URL");
+          setOauthProcessing(false);
+          setErrorMsg('Anmeldung fehlgeschlagen. Bitte erneut versuchen.');
         }
       } else if (result.type === 'cancel') {
         console.log("[AUTH] User cancelled");
@@ -149,6 +191,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error("[AUTH] Google Sign-In Exception:", err);
+      setOauthProcessing(false);
       setErrorMsg('Ein unerwarteter Fehler ist aufgetreten: ' + (err.message || err));
     }
   };
@@ -320,3 +363,18 @@ export default function Login() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  oauthOverlay: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  oauthOverlayText: {
+    marginTop: 16,
+    color: theme.colors.neutral.gray[700],
+    fontSize: 16,
+    fontFamily: 'Arial',
+  },
+});

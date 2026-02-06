@@ -89,7 +89,7 @@ export default function Onboarding() {
           style={{ color: theme.colors.neutral.gray[900] }}
           className="text-3xl font-bold text-center mb-4"
         >
-          Willkommen bei N8TLY! 
+          Willkommen bei N8LY! 
         </Text>
         
         <Text
@@ -141,13 +141,7 @@ export default function Onboarding() {
             Los geht's! 🚀
           </Text>
         </Pressable>
-        
-        <Text
-          style={{ color: theme.colors.neutral.gray[500] }}
-          className="text-sm text-center mt-4"
-        >
-          Dauert nur 2-3 Minuten
-        </Text>
+      
       </View>
     </View>
   );
