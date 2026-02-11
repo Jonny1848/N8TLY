@@ -18,6 +18,7 @@
         "NSLocationWhenInUseUsageDescription": "Diese App benötigt deinen Standort, um Events in deiner Nähe anzuzeigen.",
         "ITSAppUsesNonExemptEncryption": false
       },
+      "usesAppleSignIn": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.n8tlyapp",
       "associatedDomains": [
@@ -59,6 +60,7 @@
       "bundler": "metro"
     },
     "plugins": [
+      "expo-apple-authentication",
       "expo-router",
       "expo-video",
       "expo-audio",
