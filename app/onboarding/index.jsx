@@ -98,36 +98,6 @@ export default function Onboarding() {
         >
           Deine Social-App für unvergessliche Event-Erlebnisse in ganz Deutschland
         </Text>
-
-        <View
-          style={{
-            backgroundColor: theme.colors.neutral.white,
-            borderColor: theme.colors.primary.light,
-            borderWidth: 2
-          }}
-          className="rounded-2xl p-6"
-        >
-          <Text
-            style={{ color: theme.colors.neutral.gray[700] }}
-            className="text-base text-center mb-3"
-          >
-            Lass uns dein Profil erstellen, damit du:
-          </Text>
-          <View className="space-y-2">
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm">
-              - Die besten Events in deiner Stadt findest
-            </Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm">
-              - Gleichgesinnte triffst und dich mit ihnen connectest
-            </Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm">
-              - Neue Locations entdeckst
-            </Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm">
-              - Teil der N8TLY Community wirst
-            </Text>
-          </View>
-        </View>
       </View>
 
       {/* Unten: Button */}
@@ -138,7 +108,7 @@ export default function Onboarding() {
           className="px-8 py-4 rounded-2xl"
         >
           <Text className="text-white text-lg font-bold text-center">
-            Los geht's! 🚀
+            Los geht's!
           </Text>
         </Pressable>
       

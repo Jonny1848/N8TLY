@@ -14,6 +14,13 @@ const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMy
 
 MapboxGL.setAccessToken("sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ");
 
+const MAP_STYLE_DARK = "mapbox://styles/jonny2005/cmiag4rgh00eb01s90y2r7qw0";
+const MAP_STYLE_LIGHT = "mapbox://styles/mapbox/light-v11";
+
+/** 6am–6pm: Light | 6pm–6am: Dark */
+const getMapStyleForHour = (hour: number) =>
+  hour >= 6 && hour < 18 ? MAP_STYLE_LIGHT : MAP_STYLE_DARK;
+
 export default function HomeScreen() {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
@@ -23,12 +30,26 @@ export default function HomeScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
+  const [mapStyleUrl, setMapStyleUrl] = useState(() =>
+    getMapStyleForHour(new Date().getHours())
+  );
 
   const cameraRef = useRef<MapboxGL.Camera>(null);
   const mapRef = useRef<MapboxGL.MapView>(null);
   const flightPlayer = useAudioPlayer(require('../../assets/flight.mp3'));
 
   const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
+
+  // Map-Style: 6am–6pm Light, 6pm–6am Dark
+  useEffect(() => {
+    const updateStyle = () => {
+      const next = getMapStyleForHour(new Date().getHours());
+      setMapStyleUrl((prev) => (prev !== next ? next : prev));
+    };
+    updateStyle();
+    const id = setInterval(updateStyle, 60000); // jede Minute prüfen
+    return () => clearInterval(id);
+  }, []);
 
   // ============================
   // Nutzerposition holen
@@ -73,7 +94,7 @@ export default function HomeScreen() {
   }, []);
 
   // ============================
-  // 🔥 Supabase: Events laden basierend auf Map-Bounds
+  // Supabase: Events laden basierend auf Map-Bounds
   // ============================
   const fetchEventsInBounds = async (bounds: any) => {
     if (!bounds) return;
@@ -161,7 +182,7 @@ export default function HomeScreen() {
   };
 
   // ==================================
-  // 🔥 RENDER
+  // RENDER
   // ==================================
 
   return (
@@ -171,7 +192,7 @@ export default function HomeScreen() {
       <MapboxGL.MapView
         ref={mapRef}
         style={{ flex: 1 }}
-        styleURL="mapbox://styles/jonny2005/cmiag4rgh00eb01s90y2r7qw0"
+        styleURL={mapStyleUrl}
         onRegionDidChange={handleRegionChange}
         logoEnabled={false}
         attributionEnabled={false}
@@ -205,7 +226,7 @@ export default function HomeScreen() {
       </MapboxGL.MapView>
 
       {/* Logo zentral oben */}
-      <SafeAreaView edges={['top']} className="absolute top-0 left-0 right-0 items-center pt-1" style={{ zIndex: 10 }}>
+      <SafeAreaView edges={['top']} className="absolute left-0 right-0 items-center" style={{ zIndex: 10, top: -12 }}>
         <Image
           source={require('../../assets/N8LY9.png')}
           style={{ width: 140, height: 140 }}
