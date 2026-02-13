@@ -112,6 +112,7 @@ export default function AuthCallback() {
           marginTop: 16,
           color: error ? theme.colors.error : theme.colors.neutral.gray[700],
           fontSize: 16,
+          fontFamily: 'Manrope_400Regular',
         }}
       >
         {error ? error : 'Anmeldung wird verarbeitet...'}

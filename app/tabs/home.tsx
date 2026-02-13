@@ -273,6 +273,7 @@ export default function HomeScreen() {
                 searchCity(searchQuery);
                 setSearchQuery('');
               }}
+              style={{ fontFamily: 'Manrope_400Regular' }}
             />
           </View>
         </View>

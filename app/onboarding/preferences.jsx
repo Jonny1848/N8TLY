@@ -1,8 +1,8 @@
-import { View, Text, Pressable, ScrollView, Image } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, PartyPopper, Check } from 'lucide-react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { theme } from '../../constants/theme';
 
 const PARTY_PREFERENCES = [
@@ -18,7 +18,22 @@ const PARTY_PREFERENCES = [
   { id: 'warehouse', name: 'Warehouse', emoji: '🏭' },
 ];
 
-
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Preferences() {
   const router = useRouter();
@@ -41,115 +56,145 @@ export default function Preferences() {
   };
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 px-6 py-10">
-        <View className="">
-            <View className="flex-row items-center space-x-52">
-              <Pressable onPress={() => router.back()} className="p-2">
-                <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-              </Pressable>
-
-              <Image
-                source={require("../../assets/N8LY9.png")}
-                className="w-24 h-24"
-                resizeMode="contain"
-              />
-            </View>
-
-
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Deine Vibes
-            </Text>
-          </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-6">
-            Was sind deine Party-Präferenzen?
-          </Text>
-
-          <View className="flex-row mb-6">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-        </View>
-
-        <ScrollView 
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
         >
-          <View className="mb-8">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-xl font-bold mb-4">
-              🎉 Wo feierst du am liebsten?
-            </Text>
-            {selectedParty.length > 0 && (
-              <Text style={{ color: theme.colors.accent.main }} className="text-sm font-medium mb-3">
-                ✓ {selectedParty.length} ausgewählt
-              </Text>
-            )}
-            <View className="flex-row flex-wrap">
-              {PARTY_PREFERENCES.map((pref) => {
-                const isSelected = selectedParty.includes(pref.name);
-                return (
-                  <Pressable
-                    key={pref.id}
-                    onPress={() => toggleParty(pref)}
-                    style={{
-                      backgroundColor: isSelected ? theme.colors.accent.main : theme.colors.neutral.white,
-                      borderColor: theme.colors.neutral.gray[300],
-                      borderWidth: isSelected ? 0 : 2
-                    }}
-                    className="px-4 py-2 rounded-full m-1"
-                  >
-                    <View className="flex-row items-center">
-                      <Text className="text-base mr-2">{pref.emoji}</Text>
-                      <Text
-                        style={{
-                          color: isSelected ? '#fff' : theme.colors.neutral.gray[700]
-                        }}
-                        className="text-sm font-medium"
-                      >
-                        {pref.name}
-                      </Text>
-                      {isSelected && (
-                        <Check size={14} color="#fff" className="ml-1" />
-                      )}
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        </ScrollView>
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-        <View className="absolute bottom-0 left-0 right-0 px-6 pb-8 bg-white">
-          <Pressable
-            onPress={handleNext}
-            disabled={selectedParty.length === 0}
-            style={{
-              backgroundColor: selectedParty.length > 0 ? theme.colors.primary.main : theme.colors.neutral.gray[300]
-            }}
-            className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
-          >
-            <Text
-              style={{
-                color: selectedParty.length > 0 ? '#fff' : theme.colors.neutral.gray[500]
-              }}
-              className="text-lg font-bold mr-2"
-            >
-              Weiter
+        {/* Progress */}
+        <ProgressBar currentStep={8} totalSteps={10} />
+
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Deine Vibes
+        </Text>
+        
+        <Text className="text-lg mb-6" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Wo feierst du am liebsten?
+        </Text>
+
+        {selectedParty.length > 0 && (
+          <View style={styles.selectedBadge}>
+            <Text className="text-sm font-semibold" style={{ color: theme.colors.primary.main }}>
+              ✓ {selectedParty.length} ausgewählt
             </Text>
-            <ArrowRight size={24} color={selectedParty.length > 0 ? '#fff' : '#9ca3af'} />
-          </Pressable>
+          </View>
+        )}
+      </View>
+
+      {/* Party Preferences Grid */}
+      <ScrollView 
+        className="flex-1 px-6"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-row flex-wrap mb-32">
+          {PARTY_PREFERENCES.map((pref) => {
+            const isSelected = selectedParty.includes(pref.name);
+            return (
+              <Pressable
+                key={pref.id}
+                onPress={() => toggleParty(pref)}
+                style={[
+                  styles.prefChip,
+                  {
+                    backgroundColor: isSelected ? theme.colors.primary.main : '#fff',
+                    borderColor: isSelected ? theme.colors.primary.main : '#e5e7eb',
+                  }
+                ]}
+              >
+                <Text className="text-lg mr-2">{pref.emoji}</Text>
+                <Text
+                  className="font-medium"
+                  style={{
+                    color: isSelected ? '#fff' : theme.colors.neutral.gray[700],
+                    fontSize: 15,
+                    fontFamily: 'Manrope_500Medium',
+                  }}
+                >
+                  {pref.name}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
+      </ScrollView>
+
+      {/* Continue Button - Fixed at bottom */}
+      <View style={styles.buttonContainer}>
+        <Pressable
+          onPress={handleNext}
+          disabled={selectedParty.length === 0}
+          style={[
+            styles.continueButton,
+            { backgroundColor: selectedParty.length > 0 ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
+          ]}
+        >
+          <Text
+            className="text-lg font-bold text-center"
+            style={{ color: selectedParty.length > 0 ? '#fff' : theme.colors.neutral.gray[500] }}
+          >
+            Weiter
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  selectedBadge: {
+    backgroundColor: '#f0f9ff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  prefChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    margin: 4,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    paddingTop: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f3f4f6',
+  },
+  continueButton: {
+    paddingVertical: 18,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+});

@@ -1,10 +1,27 @@
-import { View, Text, Pressable, ScrollView, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, MapPin, Shield } from 'lucide-react-native';
+import { ChevronLeftIcon, MapPinIcon, ShieldCheckIcon } from 'react-native-heroicons/outline';
 import { theme } from '../../constants/theme';
 import * as Location from "expo-location";
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Locations() {
   const router = useRouter();
@@ -24,150 +41,178 @@ export default function Locations() {
   };
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
+        >
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
+        {/* Progress */}
+        <ProgressBar currentStep={5} totalSteps={10} />
+
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Standort
+        </Text>
+        
+        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Möchtest du deinen Standort teilen, um Events in deiner Nähe zu finden?
+        </Text>
+      </View>
+
+      {/* Content */}
+      <View className="flex-1 px-6">
+        {/* Enable Option */}
+        <Pressable
+          onPress={() => setLocationEnabled(true)}
+          style={[
+            styles.optionCard,
+            {
+              backgroundColor: locationEnabled ? '#f0f9ff' : '#fff',
+              borderColor: locationEnabled ? theme.colors.primary.main : '#e5e7eb',
+            }
+          ]}
+          className="mb-4"
+        >
+          <View className="flex-row items-start">
+            <View 
+              style={[
+                styles.iconContainer,
+                { backgroundColor: locationEnabled ? theme.colors.primary.main : '#f3f4f6' }
+              ]}
+            >
+              <MapPinIcon size={24} color={locationEnabled ? '#fff' : '#6b7280'} />
+            </View>
+            
+            <View className="flex-1 ml-4">
+              <Text className="text-lg font-bold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                Standort aktivieren
+              </Text>
+              <Text className="text-sm leading-5" style={{ color: theme.colors.neutral.gray[600] }}>
+                Finde Events in deiner Nähe und sieh, welche Freunde gerade unterwegs sind.
+              </Text>
+            </View>
+
+            {locationEnabled && (
+              <View style={styles.checkmark}>
+                <Text className="text-white font-bold">✓</Text>
+              </View>
+            )}
           </View>
+        </Pressable>
 
+        {/* Disable Option */}
+        <Pressable
+          onPress={() => setLocationEnabled(false)}
+          style={[
+            styles.optionCard,
+            {
+              backgroundColor: !locationEnabled ? '#f0f9ff' : '#fff',
+              borderColor: !locationEnabled ? theme.colors.primary.main : '#e5e7eb',
+            }
+          ]}
+        >
+          <View className="flex-row items-start">
+            <View 
+              style={[
+                styles.iconContainer,
+                { backgroundColor: !locationEnabled ? theme.colors.primary.main : '#f3f4f6' }
+              ]}
+            >
+              <ShieldCheckIcon size={24} color={!locationEnabled ? '#fff' : '#6b7280'} />
+            </View>
+            
+            <View className="flex-1 ml-4">
+              <Text className="text-lg font-bold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                Nicht jetzt
+              </Text>
+              <Text className="text-sm leading-5" style={{ color: theme.colors.neutral.gray[600] }}>
+                Du kannst diese Funktion später in den Einstellungen aktivieren.
+              </Text>
+            </View>
 
-          {/* Titel */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Standort
-            </Text>
+            {!locationEnabled && (
+              <View style={styles.checkmark}>
+                <Text className="text-white font-bold">✓</Text>
+              </View>
+            )}
           </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
-            Möchtest du deinen Standort teilen, um Events in deiner Nähe zu finden?
+        </Pressable>
+
+        {/* Info Box */}
+        <View style={styles.infoBox} className="mt-8">
+          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
+            🔒 Dein genauer Standort wird nie öffentlich geteilt. Wir zeigen nur die Stadt und Events in deiner Umgebung.
           </Text>
-
-          {/* Progress Indicator */}
-          <View className="flex-row mb-12">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          {/* Options */}
-          <View className="space-y-4">
-            {/* Standort aktivieren */}
-            <Pressable
-              onPress={() => setLocationEnabled(true)}
-              style={{
-                backgroundColor: locationEnabled ? theme.colors.accent.bg : theme.colors.neutral.white,
-                borderColor: locationEnabled ? theme.colors.accent.main : theme.colors.neutral.gray[200],
-                borderWidth: 2
-              }}
-              className="p-6 rounded-2xl"
-            >
-              <View className="flex-row items-start">
-                <View
-                  style={{
-                    backgroundColor: locationEnabled ? theme.colors.accent.main : theme.colors.neutral.gray[200]
-                  }}
-                  className="p-3 rounded-full mr-4"
-                >
-                  <MapPin size={24} color={locationEnabled ? '#fff' : theme.colors.neutral.gray[600]} />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-xl font-bold mb-2">
-                    Standort aktivieren
-                  </Text>
-                  <Text style={{ color: theme.colors.neutral.gray[600] }} className="mb-3">
-                    Finde Events und Locations in deiner Nähe. Dein genauer Standort wird niemals angezeigt.
-                  </Text>
-                  {locationEnabled && (
-                    <View className="flex-row items-center">
-                      <Shield size={16} color={theme.colors.accent.main} />
-                      <Text style={{ color: theme.colors.neutral.gray[700] }} className="font-medium ml-2">
-                        Sicher & Privat
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </Pressable>
-
-            {/* Standort deaktivieren */}
-            <Pressable
-              onPress={() => setLocationEnabled(false)}
-              style={{
-                backgroundColor: !locationEnabled ? theme.colors.accent.bg : theme.colors.neutral.white,
-                borderColor: !locationEnabled ? theme.colors.accent.main : theme.colors.neutral.gray[200],
-                borderWidth: 2
-              }}
-              className="p-6 rounded-2xl"
-            >
-              <View className="flex-row items-start">
-                <View
-                  style={{
-                    backgroundColor: !locationEnabled ? theme.colors.accent.main : theme.colors.neutral.gray[200]
-                  }}
-                  className="p-3 rounded-full mr-4"
-                >
-                  <Shield size={24} color={!locationEnabled ? '#fff' : theme.colors.neutral.gray[600]} />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-xl font-bold mb-2">
-                    Nicht jetzt
-                  </Text>
-                  <Text style={{ color: theme.colors.neutral.gray[600] }}>
-                    Du kannst Events weiterhin manuell in deiner Stadt suchen.
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* Info Boxes */}
-          <View className="space-y-3 mt-6 mb-8">
-            <View style={{ backgroundColor: theme.colors.accent.bg }} className="rounded-xl p-4">
-              <Text style={{ color: theme.colors.neutral.gray[700] }} className="text-sm">
-                🔒 Dein Standort wird nur verwendet, um dir relevante Events anzuzeigen
-              </Text>
-            </View>
-            <View style={{ backgroundColor: theme.colors.accent.bg }} className="rounded-xl p-4">
-              <Text style={{ color: theme.colors.neutral.gray[700] }} className="text-sm">
-                ⚙️ Du kannst diese Einstellung jederzeit ändern
-              </Text>
-            </View>
-          </View>
-
-          {/* Weiter Button */}
-          <Pressable
-            onPress={handleNext}
-            style={{ backgroundColor: theme.colors.primary.main }}
-            className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
-          >
-            <Text className="text-lg font-bold text-white mr-2">
-              Weiter
-            </Text>
-            <ArrowRight size={24} color="#fff" />
-          </Pressable>
         </View>
-      </ScrollView>
+      </View>
+
+      {/* Continue Button */}
+      <View className="px-6 pb-10">
+        <Pressable
+          onPress={handleNext}
+          style={[styles.continueButton, { backgroundColor: theme.colors.primary.main }]}
+        >
+          <Text className="text-lg font-bold text-center text-white">
+            Weiter
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  optionCard: {
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#10b981',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  infoBox: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 16,
+  },
+  continueButton: {
+    paddingVertical: 18,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+});

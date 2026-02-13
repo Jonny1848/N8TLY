@@ -1,118 +1,96 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, ImageBackground, StyleSheet } from 'react-native';
 import React from 'react';
-import { supabase } from "../../lib/supabase";
 import { useRouter } from 'expo-router';
-import { Sparkles } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogBody, Heading,
-  AlertDialogBackdrop,Button,ButtonText
-} from "@gluestack-ui/themed"
-import { useState } from 'react';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 
 export default function Onboarding() {
   const router = useRouter();
-  const [showAlertDialog,setShowAlertDialog] = useState(false);
-  const handleClose = () => setShowAlertDialog(false);
-  
-  
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Fehler beim Logout:', error);
-    else console.log('[AUTH] User erfolgreich abgemeldet');
-  };
 
   const startOnboarding = () => {
     router.push("/onboarding/username");
   };
 
+  const handleGoBack = () => {
+    router.replace('/login');
+  };
+
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1 justify-between items-center px-6 py-10">
-      {/* Logout oben rechts */}
-      <Pressable
-        onPress={() => setShowAlertDialog(true)}
-        style={{ backgroundColor: theme.colors.neutral.gray[100] }}
-        className="absolute top-10 right-5 px-4 py-2 rounded-lg z-10"
-      >
-        <Text style={{ color: theme.colors.neutral.gray[700] }} className="font-medium">
-          Abmelden
-        </Text>
-      </Pressable>
-      <AlertDialog isOpen={showAlertDialog} onClose={handleClose} size="md">
-        <AlertDialogBackdrop />
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <Heading className="text-typography-950 font-semibold" size="md">
-              Möchtest du dich wirklich abmelden
-            </Heading>
-          </AlertDialogHeader>
-          <AlertDialogBody className="mt-3 mb-4">
-            <Text size="sm">
-             Loggst du dich jetzt aus, wird die Erstellung deines N8TLY-Profils beendet. Willst dich also wirklich abmelden?
-            </Text>
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <View className="flex-row items-stretch">
-              <Pressable
-                variant="outline"
-                action="secondary"
-                onPress={handleClose}
-                size="sm"
-                className ="rounded-lg px-4 py-3  border-spacing-0 animate-spin border-2"
-              >
-                <Text>Abbrechen</Text>
-              </Pressable>
-              <Pressable 
-                size="sm" 
-                onPress={() => {handleLogout();handleClose();}}
-                className =" border-spacing-0 border-2 rounded-lg  ml-2 px-5 py-3 "
-              >
-                <Text>Ja</Text>
-              </Pressable>
-            </View>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-
-      {/* Oben: Logo + Texte */}
-      <View className="flex-1 justify-center items-center">
-        <View className="relative mb-8">
-          <Image source={require("../../assets/N8LY9.png")} className="w-48 h-48" />
-        </View>
-        
-        <Text
-          style={{ color: theme.colors.neutral.gray[900] }}
-          className="text-3xl font-bold text-center mb-4"
-        >
-          Willkommen bei N8LY! 
-        </Text>
-        
-        <Text
-          style={{ color: theme.colors.neutral.gray[600] }}
-          className="text-lg text-center mb-8 px-4"
-        >
-          Deine Social-App für unvergessliche Event-Erlebnisse in ganz Deutschland
-        </Text>
-      </View>
-
-      {/* Unten: Button */}
-      <View className="w-full mb-8">
-        <Pressable
-          onPress={startOnboarding}
-          style={{ backgroundColor: theme.colors.primary.main }}
-          className="px-8 py-4 rounded-2xl"
-        >
-          <Text className="text-white text-lg font-bold text-center">
-            Los geht's!
-          </Text>
-        </Pressable>
+    <ImageBackground
+      source={require("../../assets/pexels-apasaric-2078071.jpg")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      {/* Dark Overlay für bessere Lesbarkeit */}
+      <View style={styles.overlay} />
       
+      <View className="flex-1 px-6">
+        {/* Zurück-Button (oben links) */}
+        <Pressable
+          onPress={handleGoBack}
+          className="absolute top-12 left-6 p-2 rounded-full z-10"
+          style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+        >
+          <ChevronLeftIcon size={28} color="white" />
+        </Pressable>
+
+        {/* Content: Headline + Subtext + Visual */}
+        <View className="flex-1 justify-center items-center px-4">
+          {/* Headline */}
+          <Text className="text-white text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Manrope_700Bold' }}>
+            Willkommen bei N8LY
+          </Text>
+
+          {/* Subtext */}
+          <Text className="text-white/90 text-lg text-center mb-12 px-4 leading-6" style={{ fontFamily: 'Manrope_400Regular' }}>
+            Entdecke Events, vernetze dich und erlebe unvergessliche Nächte
+          </Text>
+
+          {/* Visual: Logo */}
+          <View className="items-center justify-center mb-16">
+            <Image 
+              source={require("../../assets/N8LY9.png")} 
+              style={{ width: 200, height: 200 }}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
+
+        {/* Bottom: Continue Button */}
+        <View className="pb-10">
+          <Pressable
+            onPress={startOnboarding}
+            className="bg-white rounded-3xl py-5"
+            style={styles.button}
+          >
+            <Text 
+              className="text-center text-lg font-bold"
+              style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_700Bold' }}
+            >
+              Los geht's!
+            </Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)', // Dunkles Overlay für Text-Lesbarkeit
+  },
+  button: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+});

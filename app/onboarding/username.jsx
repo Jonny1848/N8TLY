@@ -1,15 +1,26 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import {
-  Input, InputField,
-  FormControl, FormControlLabel, FormControlLabelText,
-  FormControlError, FormControlErrorIcon, FormControlErrorText,
-  FormControlHelper, FormControlHelperText
-} from '@gluestack-ui/themed';
-import { OctagonAlert, ArrowLeft, ArrowRight, User } from 'lucide-react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { theme } from '../../constants/theme';
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Username() {
   const router = useRouter();
@@ -21,12 +32,14 @@ export default function Username() {
     setUsername(text);
     setError('');
     
-    if (text.length < 3) {
-      setError('Benutzername muss mindestens 3 Zeichen haben');
-    } else if (text.length > 20) {
-      setError('Benutzername darf maximal 20 Zeichen haben');
-    } else if (!/^[a-zA-Z0-9_]+$/.test(text)) {
-      setError('Nur Buchstaben, Zahlen und _ sind erlaubt');
+    if (text.length > 0) {
+      if (text.length < 3) {
+        setError('Mindestens 3 Zeichen');
+      } else if (text.length > 20) {
+        setError('Maximal 20 Zeichen');
+      } else if (!/^[a-zA-Z0-9_]+$/.test(text)) {
+        setError('Nur Buchstaben, Zahlen und _');
+      }
     }
   };
 
@@ -40,112 +53,130 @@ export default function Username() {
   const isValid = username.length >= 3 && username.length <= 20 && /^[a-zA-Z0-9_]+$/.test(username);
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 justify-between px-6 py-10">
-        {/* Header mit Zurück-Button */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
+        >
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
-          </View>
+        {/* Progress */}
+        <ProgressBar currentStep={1} totalSteps={10} />
 
-          {/* Titel mit Icon */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Dein Username
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Dein Username
+        </Text>
+        
+        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Wähle einen coolen Benutzernamen, unter dem dich andere finden können.
+        </Text>
+      </View>
+
+      {/* Content */}
+      <View className="flex-1 px-6">
+        {/* Input Card */}
+        <View style={styles.inputCard}>
+          <Text className="text-sm font-semibold mb-2" style={{ color: theme.colors.neutral.gray[700], fontFamily: 'Manrope_600SemiBold' }}>
+            BENUTZERNAME
+          </Text>
+          <TextInput
+            value={username}
+            onChangeText={validateUsername}
+            placeholder="z.B. party_king_2024"
+            placeholderTextColor={theme.colors.neutral.gray[400]}
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={20}
+            returnKeyType="next"
+            onSubmitEditing={handleNext}
+            style={styles.input}
+          />
+          
+          {/* Helper/Error Text */}
+          <View className="flex-row justify-between items-center mt-2">
+            <Text className="text-xs" style={{ color: error ? theme.colors.error : theme.colors.neutral.gray[500], fontFamily: 'Manrope_400Regular' }}>
+              {error || '3-20 Zeichen, nur a-z, 0-9, _'}
+            </Text>
+            <Text className="text-xs" style={{ color: theme.colors.neutral.gray[400], fontFamily: 'Manrope_400Regular' }}>
+              {username.length}/20
             </Text>
           </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
-            Wähle einen coolen Benutzernamen, unter dem dich andere auf N8TLY finden können.
-          </Text>
-
-          {/* Progress Indicator */}
-          <View className="flex-row mb-8">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          {/* Input Field */}
-          <FormControl isInvalid={!!error && username.length > 0} size="md">
-            <FormControlLabel>
-              <FormControlLabelText className="text-lg font-medium">
-                Benutzername
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Input
-              className="my-2"
-              size="xl"
-              variant="outline"
-              style={{ borderColor: theme.colors.neutral.gray[300], borderWidth: 2 }}
-            >
-              <InputField
-                placeholder="Dein Username"
-                value={username}
-                onChangeText={validateUsername}
-                autoCapitalize="none"
-                autoCorrect={false}
-                maxLength={20}
-                returnKeyType="next"
-                onSubmitEditing={handleNext}
-              />
-            </Input>
-
-            <FormControlHelper>
-              <FormControlHelperText style={{ color: theme.colors.neutral.gray[500] }}>
-                3-20 Zeichen, nur Buchstaben, Zahlen und _
-              </FormControlHelperText>
-            </FormControlHelper>
-
-            {error && username.length > 0 && (
-              <FormControlError>
-                <FormControlErrorIcon as={OctagonAlert} style={{ color: theme.colors.error }} />
-                <FormControlErrorText style={{ color: theme.colors.error }}>
-                  {error}
-                </FormControlErrorText>
-              </FormControlError>
-            )}
-          </FormControl>
-
-          {/* Character counter */}
-          <Text style={{ color: theme.colors.neutral.gray[400] }} className="text-sm text-right mt-2">
-            {username.length}/20
-          </Text>
         </View>
 
-        {/* Weiter Button */}
+        {/* Info Box */}
+        <View style={styles.infoBox} className="mt-6">
+          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
+            💡 Dein Username ist öffentlich sichtbar und kann später nicht geändert werden.
+          </Text>
+        </View>
+      </View>
+
+      {/* Continue Button */}
+      <View className="px-6 pb-10">
         <Pressable
           onPress={handleNext}
           disabled={!isValid}
-          style={{
-            backgroundColor: isValid ? theme.colors.primary.main : theme.colors.neutral.gray[300]
-          }}
-          className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
+          style={[
+            styles.continueButton,
+            { backgroundColor: isValid ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
+          ]}
         >
           <Text
-            style={{ color: isValid ? '#fff' : theme.colors.neutral.gray[500] }}
-            className="text-lg font-bold mr-2"
+            className="text-lg font-bold text-center"
+            style={{ color: isValid ? '#fff' : theme.colors.neutral.gray[500], fontFamily: 'Manrope_700Bold' }}
           >
             Weiter
           </Text>
-          <ArrowRight size={24} color={isValid ? '#fff' : '#9ca3af'} />
         </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  inputCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  input: {
+    fontSize: 18,
+    color: '#111827',
+    paddingVertical: 12,
+    paddingHorizontal: 0,
+    fontFamily: 'Manrope_400Regular',
+  },
+  infoBox: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 16,
+  },
+  continueButton: {
+    paddingVertical: 18,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+});

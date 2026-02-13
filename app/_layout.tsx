@@ -28,12 +28,29 @@ import { useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native'
 import { IntroProvider, useIntro } from '../components/IntroContext';
 import { OnboardingProvider } from '../components/OnboardingContext';
+import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 
 function RootLayoutContent() {
+  // Load Manrope fonts
+  const [fontsLoaded, fontError] = useFonts({
+    Manrope_400Regular,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+  });
+
   const router = useRouter();
   const pathname = usePathname();
   const { introCompleted } = useIntro();
   const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+
+  // Debug: Check if fonts are loaded
+  useEffect(() => {
+    console.log('[FONTS] Fonts loaded:', fontsLoaded);
+    if (fontError) {
+      console.error('[FONTS] Font loading error:', fontError);
+    }
+  }, [fontsLoaded, fontError]);
 
   // verhindert Doppelnavigation & parallele handleAuthenticated-Läufe
   const navigatingRef = useRef<string | null>(null);
@@ -50,8 +67,11 @@ function RootLayoutContent() {
   }, [pendingRedirect, pathname]);
 
   useEffect(() => {
-    // Warte bis Intro abgeschlossen ist
-    if (!introCompleted) return;
+    // Warte bis Intro abgeschlossen ist und Fonts geladen
+    if (!introCompleted || !fontsLoaded) {
+      console.log('[AUTH] Waiting for intro or fonts...', { introCompleted, fontsLoaded });
+      return;
+    }
 
     let unsub = () => {};
 
@@ -83,7 +103,7 @@ function RootLayoutContent() {
     })();
 
     return () => unsub();
-  }, [introCompleted]);
+  }, [introCompleted, fontsLoaded]);
 
   function safeReplace(target: string) {
     console.log('[NAV] safeReplace called:', { target, current: navigatingRef.current, pathname });

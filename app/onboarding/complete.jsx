@@ -80,7 +80,7 @@ export default function Complete() {
 
       // Reset context und navigiere zu Home
       resetProfileData();
-      router.replace('/home');
+      router.replace('/tabs');
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
       setError(err.message || 'Ein Fehler ist aufgetreten');

@@ -291,10 +291,10 @@ export default function Login() {
 
           {/* Welcome Text */}
           <View className="mb-8 items-center justify-center" style={{ alignItems: 'center' }}>
-            <Text className="text-3xl font-bold text-black mb-2" style={{ fontFamily: 'Arial', textAlign: 'center' }}>
+            <Text className="text-3xl font-bold text-black mb-2" style={{ textAlign: 'center', fontFamily: 'Manrope_700Bold' }}>
               Welcome Back
             </Text>
-            <Text className="text-base text-gray-500" style={{ fontFamily: 'Arial', textAlign: 'center' }}>
+            <Text className="text-base text-gray-500" style={{ textAlign: 'center', fontFamily: 'Manrope_400Regular' }}>
               Welcome Back, Please enter Your details
             </Text>
           </View>
@@ -305,7 +305,7 @@ export default function Login() {
               onPress={() => setActiveTab("signin")}
               className={`flex-1 py-3 rounded-lg ${activeTab === "signin" ? "bg-white" : ""}`}
             >
-              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Arial' }}>
+              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Manrope_600SemiBold' }}>
                 Sign In
               </Text>
             </Pressable>
@@ -313,7 +313,7 @@ export default function Login() {
               onPress={() => router.replace("/signup")}
               className={`flex-1 py-3 rounded-lg ${activeTab === "signup" ? "bg-white" : ""}`}
             >
-              <Text className={`text-center font-semibold ${activeTab === "signup" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Arial' }}>
+              <Text className={`text-center font-semibold ${activeTab === "signup" ? "text-black" : "text-gray-500"}`}>
                 Signup
               </Text>
             </Pressable>
@@ -331,14 +331,14 @@ export default function Login() {
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                style={{ fontFamily: 'Arial', paddingVertical: 0, lineHeight: 20 }}
+                style={{ paddingVertical: 0, lineHeight: 20 }}
               />
               {emailValid && email.length > 0 && (
                 <CheckIcon size={20} color={theme.colors.success} />
               )}
             </View>
             {submitted && !emailValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-red-500 text-sm mt-1 ml-1" style={{}}>
                 Bitte gebe eine gültige Email ein.
               </Text>
             )}
@@ -354,7 +354,7 @@ export default function Login() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                style={{ fontFamily: 'Arial', paddingVertical: 0, lineHeight: 20 }}
+                style={{ paddingVertical: 0, lineHeight: 20 }}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
                 {showPassword ? (
@@ -365,7 +365,7 @@ export default function Login() {
               </TouchableOpacity>
             </View>
             {submitted && !passwordValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Manrope_400Regular' }}>
                 Passwort muss mindestens 6 Zeichen lang sein.
               </Text>
             )}
@@ -374,7 +374,7 @@ export default function Login() {
           {/* Error Message */}
           {errorMsg && (
             <View className="mb-4 p-3 bg-red-50 rounded-xl border border-red-200">
-              <Text className="text-red-600 text-sm" style={{ fontFamily: 'Arial' }}>{errorMsg}</Text>
+              <Text className="text-red-600 text-sm" style={{ fontFamily: 'Manrope_400Regular' }}>{errorMsg}</Text>
             </View>
           )}
 
@@ -388,12 +388,12 @@ export default function Login() {
             {loading ? (
               <View className="flex-row items-center justify-center">
                 <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-white font-semibold text-center ml-2" style={{ fontFamily: 'Arial' }}>
+                <Text className="text-white font-semibold text-center ml-2" style={{}}>
                   Loading...
                 </Text>
               </View>
             ) : (
-              <Text className="text-white font-semibold text-center text-base" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-white font-semibold text-center text-base" style={{}}>
                 Continue
               </Text>
             )}
@@ -402,7 +402,7 @@ export default function Login() {
           {/* Or Continue With */}
           <View className="flex-row items-center mb-6">
             <View className="flex-1 h-px bg-gray-300" />
-            <Text className="mx-4 text-gray-500 text-sm" style={{ fontFamily: 'Arial' }}>Or Continue With</Text>
+            <Text className="mx-4 text-gray-500 text-sm" style={{}}>Or Continue With</Text>
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 
@@ -429,7 +429,7 @@ export default function Login() {
 
           {/* Bottom Text */}
           <View className="mt-auto">
-            <Text className="text-gray-500 text-sm leading-5" style={{ fontFamily: 'Arial' }}>
+            <Text className="text-gray-500 text-sm leading-5" style={{}}>
               
             </Text>
           </View>
@@ -450,6 +450,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: theme.colors.neutral.gray[700],
     fontSize: 16,
-    fontFamily: 'Arial',
+    fontFamily: 'Manrope_400Regular',
   },
 });

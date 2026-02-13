@@ -50,7 +50,7 @@ export default function ProfileScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header with Settings */}
         <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
-          <Text className="text-3xl font-bold text-gray-900">Profil</Text>
+          <Text className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Manrope_700Bold' }}>Profil</Text>
           <Pressable className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center">
             <Settings size={24} color={theme.colors.neutral.gray[700]} />
           </Pressable>
@@ -65,41 +65,41 @@ export default function ProfileScreen() {
             </View>
             <Pressable className="absolute bottom-0 right-0 px-3 py-1.5 rounded-xl border-2 border-white" 
                       style={{ backgroundColor: theme.colors.primary.main }}>
-              <Text className="text-xs font-semibold text-white">Bearbeiten</Text>
+              <Text className="text-xs font-semibold text-white" style={{ fontFamily: 'Manrope_600SemiBold' }}>Bearbeiten</Text>
             </Pressable>
           </View>
 
-          <Text className="text-2xl font-bold text-gray-900 mb-1">{user.name}</Text>
-          <Text className="text-sm text-gray-600 mb-2">{user.username}</Text>
-          <Text className="text-sm text-gray-700 text-center mb-5">{user.bio}</Text>
+          <Text className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Manrope_700Bold' }}>{user.name}</Text>
+          <Text className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Manrope_400Regular' }}>{user.username}</Text>
+          <Text className="text-sm text-gray-700 text-center mb-5" style={{ fontFamily: 'Manrope_400Regular' }}>{user.bio}</Text>
 
           {/* Stats */}
           <View className="flex-row bg-white rounded-2xl p-4 w-full mb-4">
             <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main }}>
+              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_700Bold' }}>
                 {user.eventsAttended}
               </Text>
-              <Text className="text-xs text-gray-600">Events</Text>
+              <Text className="text-xs text-gray-600" style={{ fontFamily: 'Manrope_400Regular' }}>Events</Text>
             </View>
             <View className="w-px bg-gray-200 mx-2" />
             <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main }}>
+              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_700Bold' }}>
                 {user.friendsCount}
               </Text>
-              <Text className="text-xs text-gray-600">Freunde</Text>
+              <Text className="text-xs text-gray-600" style={{ fontFamily: 'Manrope_400Regular' }}>Freunde</Text>
             </View>
             <View className="w-px bg-gray-200 mx-2" />
             <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main }}>
+              <Text className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_700Bold' }}>
                 12
               </Text>
-              <Text className="text-xs text-gray-600">Memories</Text>
+              <Text className="text-xs text-gray-600" style={{ fontFamily: 'Manrope_400Regular' }}>Memories</Text>
             </View>
           </View>
 
           <Pressable className="w-full py-3 rounded-xl items-center" 
                     style={{ backgroundColor: theme.colors.primary.main }}>
-            <Text className="text-base font-semibold text-white">Profil bearbeiten</Text>
+            <Text className="text-base font-semibold text-white" style={{ fontFamily: 'Manrope_600SemiBold' }}>Profil bearbeiten</Text>
           </Pressable>
         </View>
 
@@ -107,9 +107,9 @@ export default function ProfileScreen() {
         <View className="px-5 mb-6">
           <View className="flex-row items-center mb-4">
             <Ticket size={22} color={theme.colors.primary.main} strokeWidth={2} />
-            <Text className="flex-1 text-lg font-bold text-gray-900 ml-2.5">Meine Tickets</Text>
+            <Text className="flex-1 text-lg font-bold text-gray-900 ml-2.5" style={{ fontFamily: 'Manrope_700Bold' }}>Meine Tickets</Text>
             <Pressable className="flex-row items-center gap-1">
-              <Text className="text-sm font-semibold" style={{ color: theme.colors.primary.main }}>
+              <Text className="text-sm font-semibold" style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_600SemiBold' }}>
                 Alle
               </Text>
               <ChevronRight size={16} color={theme.colors.primary.main} />
@@ -125,15 +125,15 @@ export default function ProfileScreen() {
                     <Calendar size={24} color={theme.colors.primary.main} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-gray-900 mb-1">
+                    <Text className="text-base font-semibold text-gray-900 mb-1" style={{ fontFamily: 'Manrope_600SemiBold' }}>
                       {ticket.event}
                     </Text>
-                    <Text className="text-xs text-gray-600">
+                    <Text className="text-xs text-gray-600" style={{ fontFamily: 'Manrope_400Regular' }}>
                       {ticket.venue} • {ticket.date}
                     </Text>
                   </View>
                   <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: theme.colors.primary.light }}>
-                    <Text className="text-sm font-bold" style={{ color: theme.colors.primary.main }}>
+                    <Text className="text-sm font-bold" style={{ color: theme.colors.primary.main, fontFamily: 'Manrope_700Bold' }}>
                       {ticket.price}
                     </Text>
                   </View>
@@ -143,20 +143,20 @@ export default function ProfileScreen() {
           ) : (
             <View className="items-center py-8">
               <Ticket size={48} color={theme.colors.neutral.gray[300]} strokeWidth={1.5} />
-              <Text className="text-sm text-gray-600 mt-3">Noch keine Tickets gekauft</Text>
+              <Text className="text-sm text-gray-600 mt-3" style={{ fontFamily: 'Manrope_400Regular' }}>Noch keine Tickets gekauft</Text>
             </View>
           )}
         </View>
 
         {/* Quick Actions */}
         <View className="px-5 mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Quick Actions</Text>
+          <Text className="text-lg font-bold text-gray-900 mb-3" style={{ fontFamily: 'Manrope_700Bold' }}>Quick Actions</Text>
           
           <Pressable className="flex-row items-center py-4 border-b border-gray-100">
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <Heart size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Favorisierte Events</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Favorisierte Events</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
 
@@ -164,7 +164,7 @@ export default function ProfileScreen() {
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <MapPin size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Favorisierte Locations</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Favorisierte Locations</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
 
@@ -172,20 +172,20 @@ export default function ProfileScreen() {
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <Star size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Event-Bewertungen</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Event-Bewertungen</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
         </View>
 
         {/* Settings Section */}
         <View className="px-5 mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Einstellungen</Text>
+          <Text className="text-lg font-bold text-gray-900 mb-3" style={{ fontFamily: 'Manrope_700Bold' }}>Einstellungen</Text>
           
           <Pressable className="flex-row items-center py-4 border-b border-gray-100">
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <Bell size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Benachrichtigungen</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Benachrichtigungen</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
 
@@ -193,7 +193,7 @@ export default function ProfileScreen() {
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <Shield size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Privatsphäre & Sicherheit</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Privatsphäre & Sicherheit</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
 
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
             <View className="w-10 h-10 rounded-xl bg-gray-100 justify-center items-center mr-3">
               <HelpCircle size={20} color={theme.colors.neutral.gray[700]} />
             </View>
-            <Text className="flex-1 text-base text-gray-900">Hilfe & Support</Text>
+            <Text className="flex-1 text-base text-gray-900" style={{ fontFamily: 'Manrope_400Regular' }}>Hilfe & Support</Text>
             <ChevronRight size={20} color={theme.colors.neutral.gray[400]} />
           </Pressable>
         </View>
@@ -214,7 +214,7 @@ export default function ProfileScreen() {
             onPress={handleLogout}
           >
             <LogOut size={20} color="#EF4444" />
-            <Text className="text-base font-semibold" style={{ color: '#EF4444' }}>
+            <Text className="text-base font-semibold" style={{ color: '#EF4444', fontFamily: 'Manrope_600SemiBold' }}>
               Abmelden
             </Text>
           </Pressable>
@@ -222,7 +222,7 @@ export default function ProfileScreen() {
 
         {/* App Version */}
         <View className="items-center py-4">
-          <Text className="text-xs text-gray-500">N8TLY Version 1.0.0</Text>
+          <Text className="text-xs text-gray-500" style={{ fontFamily: 'Manrope_400Regular' }}>N8TLY Version 1.0.0</Text>
         </View>
 
         {/* Bottom Spacing */}
