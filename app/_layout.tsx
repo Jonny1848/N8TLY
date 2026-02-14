@@ -67,10 +67,16 @@ function RootLayoutContent() {
   }, [pendingRedirect, pathname]);
 
   useEffect(() => {
-    // Warte bis Intro abgeschlossen ist und Fonts geladen
-    if (!introCompleted || !fontsLoaded) {
-      console.log('[AUTH] Waiting for intro or fonts...', { introCompleted, fontsLoaded });
+    // Warte bis Intro abgeschlossen ist und Fonts geladen (oder Font-Fehler aufgetreten)
+    // Wenn Font-Loading fehlschlägt, sollte Auth-Bootstrap trotzdem laufen
+    if (!introCompleted || (!fontsLoaded && !fontError)) {
+      console.log('[AUTH] Waiting for intro or fonts...', { introCompleted, fontsLoaded, fontError });
       return;
+    }
+
+    // Warnung ausgeben, wenn Fonts fehlgeschlagen sind, aber trotzdem fortfahren
+    if (fontError) {
+      console.warn('[AUTH] Font loading failed, but proceeding with auth bootstrap');
     }
 
     let unsub = () => {};
@@ -103,7 +109,7 @@ function RootLayoutContent() {
     })();
 
     return () => unsub();
-  }, [introCompleted, fontsLoaded]);
+  }, [introCompleted, fontsLoaded, fontError]);
 
   function safeReplace(target: string) {
     console.log('[NAV] safeReplace called:', { target, current: navigatingRef.current, pathname });

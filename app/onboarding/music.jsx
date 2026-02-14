@@ -5,7 +5,9 @@ import { useOnboarding } from '../../components/OnboardingContext';
 import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+import ProgressBar from '../../components/ProgressBar';
 
+// Verfügbare Musikgenres mit Icons
 const MUSIC_GENRES = [
   { id: 'techno', name: 'Techno', emoji: '🎧' },
   { id: 'house', name: 'House', emoji: '🏠' },
@@ -24,23 +26,6 @@ const MUSIC_GENRES = [
   { id: 'latin', name: 'Latin', emoji: '💃' },
   { id: 'jazz', name: 'Jazz', emoji: '🎺' },
 ];
-
-// Progress Bar Component
-const ProgressBar = ({ currentStep, totalSteps }) => {
-  return (
-    <View className="flex-row gap-1 mb-8">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <View
-          key={index}
-          className="flex-1 h-1 rounded-full"
-          style={{
-            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
-          }}
-        />
-      ))}
-    </View>
-  );
-};
 
 export default function MusicGenres() {
   const router = useRouter();

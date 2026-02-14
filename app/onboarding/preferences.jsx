@@ -5,7 +5,9 @@ import { useOnboarding } from '../../components/OnboardingContext';
 import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+import ProgressBar from '../../components/ProgressBar';
 
+// Verfügbare Party-Präferenzen mit Icons
 const PARTY_PREFERENCES = [
   { id: 'clubs', name: 'Clubs', emoji: '🪩' },
   { id: 'bars', name: 'Bars', emoji: '🍸' },
@@ -18,23 +20,6 @@ const PARTY_PREFERENCES = [
   { id: 'boat_party', name: 'Boat Party', emoji: '⛵' },
   { id: 'warehouse', name: 'Warehouse', emoji: '🏭' },
 ];
-
-// Progress Bar Component
-const ProgressBar = ({ currentStep, totalSteps }) => {
-  return (
-    <View className="flex-row gap-1 mb-8">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <View
-          key={index}
-          className="flex-1 h-1 rounded-full"
-          style={{
-            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
-          }}
-        />
-      ))}
-    </View>
-  );
-};
 
 export default function Preferences() {
   const router = useRouter();

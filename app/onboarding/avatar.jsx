@@ -6,23 +6,7 @@ import { ChevronLeftIcon, CameraIcon, PhotoIcon, UserCircleIcon, ArrowRightIcon 
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../../constants/theme';
-
-// Progress Bar Component
-const ProgressBar = ({ currentStep, totalSteps }) => {
-  return (
-    <View className="flex-row gap-1 mb-8">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <View
-          key={index}
-          className="flex-1 h-1 rounded-full"
-          style={{
-            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
-          }}
-        />
-      ))}
-    </View>
-  );
-};
+import ProgressBar from '../../components/ProgressBar';
 
 export default function Avatar() {
   const router = useRouter();
