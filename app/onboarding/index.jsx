@@ -3,6 +3,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { supabase } from '../../lib/supabase';
 
 export default function Onboarding() {
   const router = useRouter();
@@ -11,8 +12,21 @@ export default function Onboarding() {
     router.push("/onboarding/username");
   };
 
-  const handleGoBack = () => {
-    router.replace('/login');
+  // Benutzer abmelden und zurück zur Login-Seite navigieren
+  // Dies ermöglicht Kontowechsel und verhindert automatisches Zurückleiten zum Onboarding
+  const handleGoBack = async () => {
+    try {
+      // Benutzer abmelden, um die aktive Session zu beenden
+      await supabase.auth.signOut();
+      console.log('[ONBOARDING] User signed out, navigating to login');
+      
+      // Zur Login-Seite navigieren
+      router.replace('/login');
+    } catch (error) {
+      console.error('[ONBOARDING] Error signing out:', error);
+      // Trotz Fehler zur Login-Seite navigieren
+      router.replace('/login');
+    }
   };
 
   return (

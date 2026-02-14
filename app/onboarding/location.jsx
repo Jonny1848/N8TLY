@@ -5,24 +5,8 @@ import { useOnboarding } from '../../components/OnboardingContext';
 import { ChevronLeftIcon, MapPinIcon, ShieldCheckIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+import ProgressBar from '../../components/ProgressBar';
 import * as Location from "expo-location";
-
-// Progress Bar Component
-const ProgressBar = ({ currentStep, totalSteps }) => {
-  return (
-    <View className="flex-row gap-1 mb-8">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <View
-          key={index}
-          className="flex-1 h-1 rounded-full"
-          style={{
-            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
-          }}
-        />
-      ))}
-    </View>
-  );
-};
 
 export default function Locations() {
   const router = useRouter();

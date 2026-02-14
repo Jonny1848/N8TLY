@@ -5,7 +5,9 @@ import { useOnboarding } from '../../components/OnboardingContext';
 import { ChevronLeftIcon, MagnifyingGlassIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+import ProgressBar from '../../components/ProgressBar';
 
+// Liste deutscher Städte für die Auswahl
 const GERMAN_CITIES = [
   'Berlin', 'Hamburg', 'München', 'Köln', 'Frankfurt', 'Stuttgart',
   'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden',
@@ -18,23 +20,6 @@ const GERMAN_CITIES = [
   'Heidelberg', 'Darmstadt', 'Regensburg', 'Würzburg', 'Ingolstadt',
   'Ulm', 'Heilbronn', 'Pforzheim', 'Göttingen', 'Offenbach', 'Recklinghausen'
 ];
-
-// Progress Bar Component
-const ProgressBar = ({ currentStep, totalSteps }) => {
-  return (
-    <View className="flex-row gap-1 mb-8">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <View
-          key={index}
-          className="flex-1 h-1 rounded-full"
-          style={{
-            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
-          }}
-        />
-      ))}
-    </View>
-  );
-};
 
 export default function City() {
   const router = useRouter();
