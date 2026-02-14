@@ -292,10 +292,10 @@ export default function Login() {
           {/* Welcome Text */}
           <View className="mb-8 items-center justify-center" style={{ alignItems: 'center' }}>
             <Text className="text-3xl font-bold text-black mb-2" style={{ textAlign: 'center', fontFamily: 'Manrope_700Bold' }}>
-              Welcome Back
+              Willkommen zurück
             </Text>
             <Text className="text-base text-gray-500" style={{ textAlign: 'center', fontFamily: 'Manrope_400Regular' }}>
-              Welcome Back, Please enter Your details
+              Schön, dich wiederzusehen
             </Text>
           </View>
 
@@ -306,7 +306,7 @@ export default function Login() {
               className={`flex-1 py-3 rounded-lg ${activeTab === "signin" ? "bg-white" : ""}`}
             >
               <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Manrope_600SemiBold' }}>
-                Sign In
+                Anmelden
               </Text>
             </Pressable>
             <Pressable
@@ -314,7 +314,7 @@ export default function Login() {
               className={`flex-1 py-3 rounded-lg ${activeTab === "signup" ? "bg-white" : ""}`}
             >
               <Text className={`text-center font-semibold ${activeTab === "signup" ? "text-black" : "text-gray-500"}`}>
-                Signup
+                Registrieren
               </Text>
             </Pressable>
           </View>
@@ -325,7 +325,7 @@ export default function Login() {
               <EnvelopeIcon size={20} color={theme.colors.neutral.gray[500]} />
               <TextInput
                 className="flex-1 ml-3 text-base text-black"
-                placeholder="Email Address"
+                placeholder="E-Mail Adresse"
                 placeholderTextColor={theme.colors.neutral.gray[400]}
                 value={email}
                 onChangeText={setEmail}
@@ -349,7 +349,7 @@ export default function Login() {
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-white" style={{ minHeight: 56, paddingVertical: 16 }}>
               <TextInput
                 className="flex-1 text-base text-black"
-                placeholder="Password"
+                placeholder="Passwort"
                 placeholderTextColor={theme.colors.neutral.gray[400]}
                 value={password}
                 onChangeText={setPassword}
@@ -388,13 +388,13 @@ export default function Login() {
             {loading ? (
               <View className="flex-row items-center justify-center">
                 <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-white font-semibold text-center ml-2" style={{}}>
-                  Loading...
+                <Text className="text-white font-semibold text-center ml-2" style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                  Wird geladen...
                 </Text>
               </View>
             ) : (
-              <Text className="text-white font-semibold text-center text-base" style={{}}>
-                Continue
+              <Text className="text-white font-semibold text-center text-base" style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                Weiter
               </Text>
             )}
           </Pressable>
@@ -402,7 +402,7 @@ export default function Login() {
           {/* Or Continue With */}
           <View className="flex-row items-center mb-6">
             <View className="flex-1 h-px bg-gray-300" />
-            <Text className="mx-4 text-gray-500 text-sm" style={{}}>Or Continue With</Text>
+            <Text className="mx-4 text-gray-500 text-sm" style={{ fontFamily: 'Manrope_400Regular' }}>Oder weiter mit</Text>
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 

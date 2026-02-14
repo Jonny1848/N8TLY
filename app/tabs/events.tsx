@@ -8,7 +8,7 @@ export default function EventsScreen() {
         style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }} 
         className="text-4xl font-bold"
       >
-        Events
+        Veranstaltungen
       </Text>
     </View>
   );
