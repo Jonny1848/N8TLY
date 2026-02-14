@@ -2,7 +2,8 @@ import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform, Style
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 // Progress Bar Component
@@ -32,7 +33,7 @@ export default function Bio() {
     router.push('/onboarding/complete');
   };
 
-  const maxLength = 200;
+  const maxLength = 100;
 
   return (
     <KeyboardAvoidingView 
@@ -93,33 +94,18 @@ export default function Bio() {
             {bio.length > 0 ? '✓ Optional' : 'Optional'}
           </Text>
         </View>
-
-        {/* Tips Box */}
-        <View style={styles.tipsBox}>
-          <Text className="text-sm font-semibold mb-2" style={{ color: theme.colors.neutral.gray[700] }}>
-            💡 Tipps für eine gute Bio:
-          </Text>
-          <Text className="text-sm mb-1" style={{ color: theme.colors.neutral.gray[600] }}>
-            • Sei authentisch und positiv
-          </Text>
-          <Text className="text-sm mb-1" style={{ color: theme.colors.neutral.gray[600] }}>
-            • Lasse andere wissen, wer du bist!
-          </Text>
-          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
-            • Verwende Emojis für mehr Persönlichkeit
-          </Text>
-        </View>
       </View>
-
-      {/* Continue Button */}
-      <View className="px-6 pb-10">
-        <Pressable
-          onPress={handleNext}
-          style={[styles.continueButton, { backgroundColor: theme.colors.primary.main }]}
-        >
-          <Text className="text-lg font-bold text-center text-white">
-            {bio.length > 0 ? 'Weiter' : 'Ohne Bio fortfahren'}
-          </Text>
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
+          >
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -158,13 +144,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

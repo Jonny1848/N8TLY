@@ -2,7 +2,8 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon, MapPinIcon, ShieldCheckIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, MapPinIcon, ShieldCheckIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 import * as Location from "expo-location";
 
@@ -152,15 +153,17 @@ export default function Locations() {
         </View>
       </View>
 
-      {/* Continue Button */}
-      <View className="px-6 pb-10">
-        <Pressable
-          onPress={handleNext}
-          style={[styles.continueButton, { backgroundColor: theme.colors.primary.main }]}
-        >
-          <Text className="text-lg font-bold text-center text-white">
-            Weiter
-          </Text>
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
+          >
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
@@ -206,13 +209,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

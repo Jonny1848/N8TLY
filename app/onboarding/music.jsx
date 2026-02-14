@@ -2,7 +2,8 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 const MUSIC_GENRES = [
@@ -94,12 +95,12 @@ export default function MusicGenres() {
         )}
       </View>
 
-      {/* Genres Grid */}
+      {/* Genres Grid - Two Columns */}
       <ScrollView 
         className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-row flex-wrap mb-32">
+        <View style={styles.gridContainer}>
           {MUSIC_GENRES.map((genre) => {
             const isSelected = selectedGenres.includes(genre.name);
             return (
@@ -109,7 +110,7 @@ export default function MusicGenres() {
                 style={[
                   styles.genreChip,
                   {
-                    backgroundColor: isSelected ? theme.colors.primary.main : '#fff',
+                    backgroundColor: isSelected ? theme.colors.primary.main2 : '#fff',
                     borderColor: isSelected ? theme.colors.primary.main : '#e5e7eb',
                   }
                 ]}
@@ -131,24 +132,21 @@ export default function MusicGenres() {
         </View>
       </ScrollView>
 
-      {/* Continue Button - Fixed at bottom */}
-      <View style={styles.buttonContainer}>
-        <Pressable
-          onPress={handleNext}
-          disabled={selectedGenres.length === 0}
-          style={[
-            styles.continueButton,
-            { backgroundColor: selectedGenres.length > 0 ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
-          ]}
-        >
-          <Text
-            className="text-lg font-bold text-center"
-            style={{ color: selectedGenres.length > 0 ? '#fff' : theme.colors.neutral.gray[500] }}
-          >
-            Weiter
-          </Text>
-        </Pressable>
-      </View>
+      {/* Round Continue Button - Bottom Right */}
+      {selectedGenres.length >= 1 && (
+        <View style={styles.buttonContainerFixed}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -168,13 +166,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingBottom: 120,
+  },
   genreChip: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 24,
-    margin: 4,
+    marginBottom: 12,
+    width: '48%',
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -182,25 +188,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  buttonContainer: {
+  buttonContainerFixed: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    paddingTop: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    bottom: 50,
+    right: 30,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

@@ -2,7 +2,8 @@ import { View, Text, Pressable, ScrollView, TextInput, StyleSheet } from 'react-
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon, MagnifyingGlassIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, MagnifyingGlassIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 const GERMAN_CITIES = [
@@ -122,24 +123,21 @@ export default function City() {
         </View>
       </ScrollView>
 
-      {/* Continue Button - Fixed at bottom */}
-      <View style={styles.buttonContainer}>
-        <Pressable
-          onPress={handleNext}
-          disabled={!selectedCity}
-          style={[
-            styles.continueButton,
-            { backgroundColor: selectedCity ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
-          ]}
-        >
-          <Text
-            className="text-lg font-bold text-center"
-            style={{ color: selectedCity ? '#fff' : theme.colors.neutral.gray[500] }}
-          >
-            Weiter
-          </Text>
-        </Pressable>
-      </View>
+      {/* Round Continue Button - Bottom Right */}
+      {selectedCity && (
+        <View style={styles.buttonContainerFixed}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -186,25 +184,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  buttonContainer: {
+  buttonContainerFixed: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    paddingTop: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    bottom: 50,
+    right: 30,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

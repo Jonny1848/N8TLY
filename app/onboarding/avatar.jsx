@@ -1,8 +1,9 @@
-import { View, Text, Pressable, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon, CameraIcon, PhotoIcon, UserCircleIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, CameraIcon, PhotoIcon, UserCircleIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../../constants/theme';
 
@@ -66,104 +67,101 @@ export default function Avatar() {
 
   return (
     <View style={styles.container}>
-      {/* Header with Back Button */}
-      <View className="px-6 pt-12 pb-6">
-        <Pressable 
-          onPress={() => router.back()} 
-          className="mb-6"
-          style={styles.backButton}
-        >
-          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
-        </Pressable>
-
-        {/* Progress */}
-        <ProgressBar currentStep={6} totalSteps={10} />
-
-        {/* Title */}
-        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
-          Profilbild
-        </Text>
-        
-        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
-          Zeig dein Gesicht! Ein Profilbild macht dich für andere erkennbar.
-        </Text>
-      </View>
-
-      {/* Content */}
-      <View className="flex-1 px-6 items-center">
-        {/* Avatar Preview */}
-        <View className="items-center mb-8">
-          {avatarUri ? (
-            <View style={styles.avatarContainer}>
-              <Image source={{ uri: avatarUri }} style={styles.avatar} />
-              <Pressable 
-                onPress={pickImage}
-                style={styles.editBadge}
-              >
-                <PhotoIcon size={20} color="#fff" />
-              </Pressable>
-            </View>
-          ) : (
-            <View style={styles.placeholderContainer}>
-              <UserCircleIcon size={100} color={theme.colors.neutral.gray[300]} />
-            </View>
-          )}
-        </View>
-
-        {/* Action Buttons */}
-        <View className="w-full mb-6">
-          <Pressable
-            onPress={takePhoto}
-            style={styles.actionButton}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header with Back Button */}
+        <View className="px-6 pt-12 pb-6">
+          <Pressable 
+            onPress={() => router.back()} 
+            className="mb-6"
+            style={styles.backButton}
           >
-            <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary.main }]}>
-              <CameraIcon size={24} color="#fff" />
-            </View>
-            <View className="flex-1 ml-4">
-              <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
-                Foto aufnehmen
-              </Text>
-              <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
-                Nimm ein neues Foto mit der Kamera auf
-              </Text>
-            </View>
+            <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
           </Pressable>
 
-          <Pressable
-            onPress={pickImage}
-            style={[styles.actionButton, { marginTop: 12 }]}
+          {/* Progress */}
+          <ProgressBar currentStep={6} totalSteps={10} />
+
+          {/* Title */}
+          <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+            Profilbild
+          </Text>
+          
+          <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+            Zeig dein Gesicht! Ein Profilbild macht dich für andere erkennbar.
+          </Text>
+        </View>
+
+        {/* Content */}
+        <View className="flex-1 px-6 items-center pb-32">
+          {/* Avatar Preview */}
+          <View className="items-center mb-8">
+            {avatarUri ? (
+              <View style={styles.avatarContainer}>
+                <Image source={{ uri: avatarUri }} style={styles.avatar} />
+                <Pressable 
+                  onPress={pickImage}
+                  style={styles.editBadge}
+                >
+                  <PhotoIcon size={20} color="#fff" />
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <UserCircleIcon size={100} color={theme.colors.neutral.gray[300]} />
+              </View>
+            )}
+          </View>
+
+          {/* Action Buttons */}
+          <View className="w-full mb-6">
+            <Pressable
+              onPress={takePhoto}
+              style={styles.actionButton}
+            >
+              <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary.main }]}>
+                <CameraIcon size={24} color="#fff" />
+              </View>
+              <View className="flex-1 ml-4">
+                <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                  Foto aufnehmen
+                </Text>
+                <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
+                  Nimm ein neues Foto mit der Kamera auf
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              onPress={pickImage}
+              style={[styles.actionButton, { marginTop: 12 }]}
+            >
+              <View style={[styles.iconCircle, { backgroundColor: '#8b5cf6' }]}>
+                <PhotoIcon size={24} color="#fff" />
+              </View>
+              <View className="flex-1 ml-4">
+                <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                  Aus Galerie wählen
+                </Text>
+                <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
+                  Wähle ein Bild aus deiner Bibliothek
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
           >
-            <View style={[styles.iconCircle, { backgroundColor: '#8b5cf6' }]}>
-              <PhotoIcon size={24} color="#fff" />
-            </View>
-            <View className="flex-1 ml-4">
-              <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
-                Aus Galerie wählen
-              </Text>
-              <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
-                Wähle ein Bild aus deiner Bibliothek
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* Info Box */}
-        <View style={styles.infoBox}>
-          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
-            💡 Du kannst dein Profilbild jederzeit in den Einstellungen ändern.
-          </Text>
-        </View>
-      </View>
-
-      {/* Continue Button */}
-      <View className="px-6 pb-10">
-        <Pressable
-          onPress={handleNext}
-          style={[styles.continueButton, { backgroundColor: theme.colors.primary.main }]}
-        >
-          <Text className="text-lg font-bold text-center text-white">
-            {avatarUri ? 'Weiter' : 'Überspringen'}
-          </Text>
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
@@ -237,19 +235,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  infoBox: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 16,
-    width: '100%',
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

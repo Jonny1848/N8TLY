@@ -2,7 +2,8 @@ import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 // Progress Bar Component
@@ -81,15 +82,12 @@ export default function Age() {
 
       {/* Content */}
       <View className="flex-1 px-6">
-        {/* Input Card */}
-        <View style={styles.inputCard}>
-          <Text className="text-sm font-semibold mb-2" style={{ color: theme.colors.neutral.gray[700], fontFamily: 'Manrope_600SemiBold' }}>
-            ALTER
-          </Text>
+        {/* Simple Input Box - Figma Style */}
+        <View style={styles.inputBox}>
           <TextInput
             value={age}
             onChangeText={validateAge}
-            placeholder="z.B. 25"
+            placeholder="Alter"
             placeholderTextColor={theme.colors.neutral.gray[400]}
             keyboardType="number-pad"
             maxLength={2}
@@ -97,39 +95,29 @@ export default function Age() {
             onSubmitEditing={handleNext}
             style={styles.input}
           />
-          
-          {/* Helper/Error Text */}
-          <Text className="text-xs mt-2" style={{ color: error ? theme.colors.error : theme.colors.neutral.gray[500] }}>
-            {error || 'Mindestalter: 16 Jahre'}
-          </Text>
         </View>
 
-        {/* Info Box */}
-        <View style={styles.infoBox} className="mt-6">
-          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
-            🔒 Dein Alter ist nicht öffentlich sichtbar und wird nur für altersgerechte Event-Vorschläge verwendet.
-          </Text>
-        </View>
+        {/* Helper Text */}
+        <Text className="text-sm mt-4" style={{ color: theme.colors.neutral.gray[500], fontFamily: 'Manrope_400Regular' }}>
+          Dies dient zur Personalisierung deines Erlebnisses und wird nicht in deinem Profil sichtbar sein.
+        </Text>
       </View>
 
-      {/* Continue Button */}
-      <View className="px-6 pb-10">
-        <Pressable
-          onPress={handleNext}
-          disabled={!isValid}
-          style={[
-            styles.continueButton,
-            { backgroundColor: isValid ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
-          ]}
-        >
-          <Text
-            className="text-lg font-bold text-center"
-            style={{ color: isValid ? '#fff' : theme.colors.neutral.gray[500] }}
-          >
-            Weiter
-          </Text>
-        </Pressable>
-      </View>
+      {/* Round Continue Button - Bottom Right */}
+      {isValid && (
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -142,37 +130,34 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: 'flex-start',
   },
-  inputCard: {
+  inputBox: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1.5,
+    borderColor: '#d1d5db',
+    paddingHorizontal: 20,
+    paddingVertical: 18,
   },
   input: {
     fontSize: 18,
     color: '#111827',
-    paddingVertical: 12,
-    paddingHorizontal: 0,
     fontFamily: 'Manrope_400Regular',
   },
-  infoBox: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 16,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

@@ -2,7 +2,8 @@ import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 // Progress Bar Component
@@ -78,62 +79,48 @@ export default function Username() {
       </View>
 
       {/* Content */}
-      <View className="flex-1 px-6">
-        {/* Input Card */}
-        <View style={styles.inputCard}>
-          <Text className="text-sm font-semibold mb-2" style={{ color: theme.colors.neutral.gray[700], fontFamily: 'Manrope_600SemiBold' }}>
-            BENUTZERNAME
-          </Text>
+      <View className="flex-1 items-center" style={{ marginTop: 60 }}>
+        {/* Username Input - Large @ style */}
+        <View className="flex-row items-center">
+          <Text style={styles.atSymbol}>@</Text>
           <TextInput
             value={username}
             onChangeText={validateUsername}
-            placeholder="z.B. party_king_2024"
+            placeholder="username"
             placeholderTextColor={theme.colors.neutral.gray[400]}
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={20}
-            returnKeyType="next"
+            returnKeyType="done"
             onSubmitEditing={handleNext}
-            style={styles.input}
+            style={styles.usernameInput}
+            autoFocus={true}
           />
-          
-          {/* Helper/Error Text */}
-          <View className="flex-row justify-between items-center mt-2">
-            <Text className="text-xs" style={{ color: error ? theme.colors.error : theme.colors.neutral.gray[500], fontFamily: 'Manrope_400Regular' }}>
-              {error || '3-20 Zeichen, nur a-z, 0-9, _'}
-            </Text>
-            <Text className="text-xs" style={{ color: theme.colors.neutral.gray[400], fontFamily: 'Manrope_400Regular' }}>
-              {username.length}/20
-            </Text>
-          </View>
         </View>
 
-        {/* Info Box */}
-        <View style={styles.infoBox} className="mt-6">
-          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
-            💡 Dein Username ist öffentlich sichtbar und kann später nicht geändert werden.
+        {/* Error Message */}
+        {error && (
+          <Text style={styles.errorText}>
+            {error}
           </Text>
-        </View>
+        )}
       </View>
 
-      {/* Continue Button */}
-      <View className="px-6 pb-10">
-        <Pressable
-          onPress={handleNext}
-          disabled={!isValid}
-          style={[
-            styles.continueButton,
-            { backgroundColor: isValid ? theme.colors.primary.main : theme.colors.neutral.gray[300] }
-          ]}
-        >
-          <Text
-            className="text-lg font-bold text-center"
-            style={{ color: isValid ? '#fff' : theme.colors.neutral.gray[500], fontFamily: 'Manrope_700Bold' }}
-          >
-            Weiter
-          </Text>
-        </Pressable>
-      </View>
+      {/* Round Continue Button - Bottom Right */}
+      {isValid && (
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -146,37 +133,42 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: 'flex-start',
   },
-  inputCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+  atSymbol: {
+    fontSize: 48,
+    color: theme.colors.neutral.gray[900],
+    fontFamily: 'Manrope_700Bold',
   },
-  input: {
-    fontSize: 18,
-    color: '#111827',
-    paddingVertical: 12,
-    paddingHorizontal: 0,
+  usernameInput: {
+    fontSize: 48,
+    color: theme.colors.neutral.gray[900],
+    fontFamily: 'Manrope_700Bold',
+    paddingVertical: 0,
+    marginLeft: 4,
+    minWidth: 200,
+    textAlign: 'left',
+  },
+  errorText: {
+    fontSize: 14,
+    color: theme.colors.error,
     fontFamily: 'Manrope_400Regular',
+    marginTop: 16,
+    textAlign: 'center',
   },
-  infoBox: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 16,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
   },
-  continueButton: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });
