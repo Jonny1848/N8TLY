@@ -1,10 +1,28 @@
-import { View, Text, Pressable, Image,ScrollView } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, Camera, User, Upload } from 'lucide-react-native';
+import { ChevronLeftIcon, CameraIcon, PhotoIcon, UserCircleIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../../constants/theme';
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Avatar() {
   const router = useRouter();
@@ -27,7 +45,7 @@ export default function Avatar() {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Wir benötigen Zugriff auf deine Kamera');
+      Alert.alert('Kamera-Zugriff', 'Wir benötigen Zugriff auf deine Kamera');
       return;
     }
 
@@ -47,144 +65,191 @@ export default function Avatar() {
     router.push('/onboarding/music');
   };
 
-  const handleSkip = () => {
-    updateProfileData({ avatarUri: null });
-    router.push('/onboarding/music');
-  };
-
   return (
-    <ScrollView style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 justify-between px-6 py-10">
-        {/* Header */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header with Back Button */}
+        <View className="px-6 pt-12 pb-6">
+          <Pressable 
+            onPress={() => router.back()} 
+            className="mb-6"
+            style={styles.backButton}
+          >
+            <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+          </Pressable>
 
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
-          </View>
+          {/* Progress */}
+          <ProgressBar currentStep={6} totalSteps={10} />
 
-
-          {/* Titel */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Profilbild
-            </Text>
-          </View>
+          {/* Title */}
+          <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+            Profilbild
+          </Text>
           
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
+          <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
             Zeig dein Gesicht! Ein Profilbild macht dich für andere erkennbar.
           </Text>
+        </View>
 
-          {/* Progress Indicator */}
-          <View className="flex-row mb-12">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
+        {/* Content */}
+        <View className="flex-1 px-6 items-center pb-32">
           {/* Avatar Preview */}
           <View className="items-center mb-8">
-            <View className="relative">
-              {avatarUri ? (
-                <Image
-                  source={{ uri: avatarUri }}
-                  style={{ borderColor: theme.colors.accent.main, borderWidth: 4 }}
-                  className="w-40 h-40 rounded-full"
-                />
-              ) : (
-                <View
-                  style={{
-                    backgroundColor: theme.colors.accent.bg,
-                    borderColor: theme.colors.accent.main,
-                    borderWidth: 4
-                  }}
-                  className="w-40 h-40 rounded-full items-center justify-center"
+            {avatarUri ? (
+              <View style={styles.avatarContainer}>
+                <Image source={{ uri: avatarUri }} style={styles.avatar} />
+                <Pressable 
+                  onPress={pickImage}
+                  style={styles.editBadge}
                 >
-                  <User size={64} color={theme.colors.accent.main} />
-                </View>
-              )}
-              <Pressable
-                onPress={pickImage}
-                style={{ backgroundColor: theme.colors.accent.main }}
-                className="absolute bottom-0 right-0 p-3 rounded-full border-4 border-white"
-              >
-                <Upload size={20} color="#fff" />
-              </Pressable>
-            </View>
+                  <PhotoIcon size={20} color="#fff" />
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <UserCircleIcon size={100} color={theme.colors.neutral.gray[300]} />
+              </View>
+            )}
           </View>
 
           {/* Action Buttons */}
-          <View className="space-y-4">
+          <View className="w-full mb-6">
             <Pressable
               onPress={takePhoto}
-              style={{
-                backgroundColor: theme.colors.neutral.white,
-                borderColor: theme.colors.accent.main,
-                borderWidth: 2
-              }}
-              className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
+              style={styles.actionButton}
             >
-              <Camera size={24} color={theme.colors.accent.main} />
-              <Text style={{ color: theme.colors.accent.main }} className="text-lg font-bold ml-3">
-                Foto aufnehmen
-              </Text>
+              <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary.main }]}>
+                <CameraIcon size={24} color="#fff" />
+              </View>
+              <View className="flex-1 ml-4">
+                <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                  Foto aufnehmen
+                </Text>
+                <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
+                  Nimm ein neues Foto mit der Kamera auf
+                </Text>
+              </View>
             </Pressable>
 
             <Pressable
               onPress={pickImage}
-              style={{
-                backgroundColor: theme.colors.neutral.white,
-                borderColor: theme.colors.accent.main,
-                borderWidth: 2
-              }}
-              className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
+              style={[styles.actionButton, { marginTop: 12 }]}
             >
-              <Upload size={24} color={theme.colors.accent.main} />
-              <Text style={{ color: theme.colors.accent.main }} className="text-lg font-bold ml-3">
-                Aus Galerie wählen
-              </Text>
+              <View style={[styles.iconCircle, { backgroundColor: '#8b5cf6' }]}>
+                <PhotoIcon size={24} color="#fff" />
+              </View>
+              <View className="flex-1 ml-4">
+                <Text className="text-lg font-semibold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                  Aus Galerie wählen
+                </Text>
+                <Text className="text-sm" style={{ color: theme.colors.neutral.gray[600] }}>
+                  Wähle ein Bild aus deiner Bibliothek
+                </Text>
+              </View>
             </Pressable>
           </View>
         </View>
+      </ScrollView>
 
-        {/* Buttons */}
-        <View className="space-y-3 mb-8">
-          {avatarUri && (
-            <Pressable
-              onPress={handleNext}
-              style={{ backgroundColor: theme.colors.primary.main }}
-              className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
-            >
-              <Text className="text-lg font-bold text-white mr-2">
-                Weiter
-              </Text>
-              <ArrowRight size={24} color="#fff" />
-            </Pressable>
-          )}
-          
-          <Pressable
-            onPress={handleSkip}
-            className="flex-row items-center justify-center px-6 py-4"
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
           >
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">
-              Später hinzufügen
-            </Text>
-          </Pressable>
-        </View>
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 4,
+    borderColor: '#e5e7eb',
+  },
+  placeholderContainer: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#e5e7eb',
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: '#8b5cf6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});

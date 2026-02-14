@@ -334,11 +334,11 @@ export default function SignUp() {
 
           {/* Welcome Text */}
           <View className="mb-6 items-center justify-center" style={{ alignItems: 'center' }}>
-            <Text className="text-3xl font-bold text-black mb-2" style={{ fontFamily: 'Arial', textAlign: 'center' }}>
-              Create Account
+            <Text className="text-3xl font-bold text-black mb-2" style={{ textAlign: 'center', fontFamily: 'Manrope_700Bold' }}>
+              Konto erstellen
             </Text>
-            <Text className="text-base text-gray-500" style={{ fontFamily: 'Arial', textAlign: 'center' }}>
-              Create your account to get started
+            <Text className="text-base text-gray-500" style={{ textAlign: 'center', fontFamily: 'Manrope_400Regular' }}>
+              Erstelle dein Konto und leg los
             </Text>
           </View>
 
@@ -348,16 +348,16 @@ export default function SignUp() {
               onPress={() => router.replace("/login")}
               className={`flex-1 py-3 rounded-lg ${activeTab === "signin" ? "bg-white" : ""}`}
             >
-              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Arial' }}>
-                Sign In
+              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                Anmelden
               </Text>
             </Pressable>
             <Pressable
               onPress={() => setActiveTab("signup")}
               className={`flex-1 py-3 rounded-lg ${activeTab === "signup" ? "bg-white" : ""}`}
             >
-              <Text className={`text-center font-semibold ${activeTab === "signup" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Arial' }}>
-                Signup
+              <Text className={`text-center font-semibold ${activeTab === "signup" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                Registrieren
               </Text>
             </Pressable>
           </View>
@@ -368,20 +368,20 @@ export default function SignUp() {
               <EnvelopeIcon size={20} color={theme.colors.neutral.gray[500]} />
               <TextInput
                 className="flex-1 ml-3 text-base text-black"
-                placeholder="Email Address"
+                placeholder="E-Mail Adresse"
                 placeholderTextColor={theme.colors.neutral.gray[400]}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                style={{ fontFamily: 'Arial', paddingVertical: 0, lineHeight: 20 }}
+                style={{ paddingVertical: 0, lineHeight: 20 }}
               />
               {emailValid && email.length > 0 && (
                 <CheckIcon size={20} color={theme.colors.success} />
               )}
             </View>
             {submitted && !emailValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-red-500 text-sm mt-1 ml-1" style={{}}>
                 Bitte gebe eine gültige Email ein.
               </Text>
             )}
@@ -392,12 +392,12 @@ export default function SignUp() {
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-white" style={{ minHeight: 56, paddingVertical: 16 }}>
               <TextInput
                 className="flex-1 text-base text-black"
-                placeholder="Password"
+                placeholder="Passwort"
                 placeholderTextColor={theme.colors.neutral.gray[400]}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                style={{ fontFamily: 'Arial', paddingVertical: 0, lineHeight: 20 }}
+                style={{ paddingVertical: 0, lineHeight: 20 }}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
                 {showPassword ? (
@@ -408,7 +408,7 @@ export default function SignUp() {
               </TouchableOpacity>
             </View>
             {submitted && !passwordValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-red-500 text-sm mt-1 ml-1" style={{}}>
                 Passwort muss mindestens 6 Zeichen lang sein.
               </Text>
             )}
@@ -419,12 +419,12 @@ export default function SignUp() {
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-white" style={{ minHeight: 56, paddingVertical: 16 }}>
               <TextInput
                 className="flex-1 text-base text-black"
-                placeholder="Confirm Password"
+                placeholder="Passwort bestätigen"
                 placeholderTextColor={theme.colors.neutral.gray[400]}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
-                style={{ fontFamily: 'Arial', paddingVertical: 0, lineHeight: 20 }}
+                style={{ paddingVertical: 0, lineHeight: 20 }}
               />
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={{ padding: 4 }}>
                 {showConfirmPassword ? (
@@ -435,7 +435,7 @@ export default function SignUp() {
               </TouchableOpacity>
             </View>
             {submitted && !passwordMatch && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Arial' }}>
+              <Text className="text-red-500 text-sm mt-1 ml-1" style={{}}>
                 Passwörter stimmen nicht überein.
               </Text>
             )}
@@ -444,7 +444,7 @@ export default function SignUp() {
           {/* Error Message */}
           {errorMsg && (
             <View className="mb-3 p-3 bg-red-50 rounded-xl border border-red-200">
-              <Text className="text-red-600 text-sm" style={{ fontFamily: 'Arial' }}>{errorMsg}</Text>
+              <Text className="text-red-600 text-sm" style={{}}>{errorMsg}</Text>
             </View>
           )}
 
@@ -458,13 +458,13 @@ export default function SignUp() {
             {loading ? (
               <View className="flex-row items-center justify-center">
                 <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-white font-semibold text-center ml-2" style={{ fontFamily: 'Arial' }}>
-                  Loading...
+                <Text className="text-white font-semibold text-center ml-2" style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                  Wird geladen...
                 </Text>
               </View>
             ) : (
-              <Text className="text-white font-semibold text-center text-base" style={{ fontFamily: 'Arial' }}>
-                Get started
+              <Text className="text-white font-semibold text-center text-base" style={{ fontFamily: 'Manrope_600SemiBold' }}>
+                Loslegen
               </Text>
             )}
           </Pressable>
@@ -472,7 +472,7 @@ export default function SignUp() {
           {/* Or Continue With */}
           <View className="flex-row items-center mb-5">
             <View className="flex-1 h-px bg-gray-300" />
-            <Text className="mx-4 text-gray-500 text-sm" style={{ fontFamily: 'Arial' }}>Or Continue With</Text>
+            <Text className="mx-4 text-gray-500 text-sm" style={{ fontFamily: 'Manrope_400Regular' }}>Oder weiter mit</Text>
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 
@@ -513,6 +513,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: theme.colors.neutral.gray[600],
-    fontFamily: 'Arial',
+    fontFamily: 'Manrope_400Regular',
   },
 });

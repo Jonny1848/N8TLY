@@ -265,7 +265,7 @@ export default function HomeScreen() {
             <MagnifyingGlassIcon size={22} color={theme.colors.neutral.gray[500]} />
             <TextInput
               className="flex-1 ml-3 text-base text-gray-900"
-              placeholder="Where do you want to go?"
+              placeholder="Wohin möchtest du?"
               placeholderTextColor={theme.colors.neutral.gray[400]}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -273,6 +273,7 @@ export default function HomeScreen() {
                 searchCity(searchQuery);
                 setSearchQuery('');
               }}
+              style={{ fontFamily: 'Manrope_400Regular' }}
             />
           </View>
         </View>

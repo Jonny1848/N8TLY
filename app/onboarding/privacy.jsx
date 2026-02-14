@@ -1,9 +1,27 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, Lock, Globe, Eye, EyeOff } from 'lucide-react-native';
+import { ChevronLeftIcon, GlobeAltIcon, LockClosedIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Privacy() {
   const router = useRouter();
@@ -16,138 +34,188 @@ export default function Privacy() {
   };
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 justify-between px-6 py-10">
-        {/* Header */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
-
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
-          </View>
-
-
-          {/* Titel */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Privatsphäre
-            </Text>
-          </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
-            Entscheide, wer dein Profil sehen kann.
-          </Text>
-
-          {/* Progress Indicator */}
-          <View className="flex-row mb-12">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          {/* Options */}
-          <View className="space-y-4">
-            {/* Öffentliches Profil */}
-            <Pressable
-              onPress={() => setIsPublic(true)}
-              style={{
-                backgroundColor: isPublic ? theme.colors.accent.bg : theme.colors.neutral.white,
-                borderColor: isPublic ? theme.colors.accent.main : theme.colors.neutral.gray[200],
-                borderWidth: 2
-              }}
-              className="p-6 rounded-2xl"
-            >
-              <View className="flex-row items-start">
-                <View
-                  style={{
-                    backgroundColor: isPublic ? theme.colors.accent.main : theme.colors.neutral.gray[200]
-                  }}
-                  className="p-3 rounded-full mr-4"
-                >
-                  <Globe size={24} color={isPublic ? '#fff' : theme.colors.neutral.gray[600]} />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-xl font-bold mb-2">
-                    Öffentlich
-                  </Text>
-                  <Text style={{ color: theme.colors.neutral.gray[600] }}>
-                    Jeder auf N8TLY kann dein Profil sehen und dir Freundschaftsanfragen senden.
-                  </Text>
-                  {isPublic && (
-                    <View style={{ backgroundColor: theme.colors.accent.bg }} className="mt-3 rounded-lg px-3 py-2">
-                      <Text style={{ color: theme.colors.neutral.gray[700] }} className="font-medium">
-                        ✓ Empfohlen für beste Erfahrung
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </Pressable>
-
-            {/* Privates Profil */}
-            <Pressable
-              onPress={() => setIsPublic(false)}
-              style={{
-                backgroundColor: !isPublic ? theme.colors.accent.bg : theme.colors.neutral.white,
-                borderColor: !isPublic ? theme.colors.accent.main : theme.colors.neutral.gray[200],
-                borderWidth: 2
-              }}
-              className="p-6 rounded-2xl"
-            >
-              <View className="flex-row items-start">
-                <View
-                  style={{
-                    backgroundColor: !isPublic ? theme.colors.accent.main : theme.colors.neutral.gray[200]
-                  }}
-                  className="p-3 rounded-full mr-4"
-                >
-                  <EyeOff size={24} color={!isPublic ? '#fff' : theme.colors.neutral.gray[600]} />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-xl font-bold mb-2">
-                    Privat
-                  </Text>
-                  <Text style={{ color: theme.colors.neutral.gray[600] }}>
-                    Nur deine Freunde können dein Profil sehen. Andere müssen dich über deinen Benutzernamen finden.
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* Info Box */}
-          <View style={{ backgroundColor: theme.colors.neutral.gray[50] }} className="rounded-xl p-4 mt-6">
-            <Text style={{ color: theme.colors.neutral.gray[700] }} className="text-sm">
-              💡 Du kannst diese Einstellung jederzeit in deinen Profil-Einstellungen ändern.
-            </Text>
-          </View>
-        </View>
-
-        {/* Weiter Button */}
-        <Pressable
-          onPress={handleNext}
-          style={{ backgroundColor: theme.colors.primary.main }}
-          className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
         >
-          <Text className="text-lg font-bold text-white mr-2">
-            Weiter
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
+
+        {/* Progress */}
+        <ProgressBar currentStep={3} totalSteps={10} />
+
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Privatsphäre
+        </Text>
+        
+        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Entscheide, wer dein Profil sehen kann.
+        </Text>
+      </View>
+
+      {/* Content */}
+      <View className="flex-1 px-6">
+        {/* Public Option */}
+        <Pressable
+          onPress={() => setIsPublic(true)}
+          style={[
+            styles.optionCard,
+            {
+              backgroundColor: isPublic ? '#f0f9ff' : '#fff',
+              borderColor: isPublic ? theme.colors.primary.main : '#e5e7eb',
+            }
+          ]}
+          className="mb-4"
+        >
+          <View className="flex-row items-start">
+            <View 
+              style={[
+                styles.iconContainer,
+                { backgroundColor: isPublic ? theme.colors.primary.main : '#f3f4f6' }
+              ]}
+            >
+              <GlobeAltIcon size={24} color={isPublic ? '#fff' : '#6b7280'} />
+            </View>
+            
+            <View className="flex-1 ml-4">
+              <Text className="text-lg font-bold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                Öffentliches Profil
+              </Text>
+              <Text className="text-sm leading-5" style={{ color: theme.colors.neutral.gray[600] }}>
+                Jeder kann dein Profil sehen und dir folgen. Ideal, um neue Leute kennenzulernen.
+              </Text>
+            </View>
+
+            {isPublic && (
+              <View style={styles.checkmark}>
+                <Text className="text-white font-bold">✓</Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+
+        {/* Private Option */}
+        <Pressable
+          onPress={() => setIsPublic(false)}
+          style={[
+            styles.optionCard,
+            {
+              backgroundColor: !isPublic ? '#f0f9ff' : '#fff',
+              borderColor: !isPublic ? theme.colors.primary.main : '#e5e7eb',
+            }
+          ]}
+        >
+          <View className="flex-row items-start">
+            <View 
+              style={[
+                styles.iconContainer,
+                { backgroundColor: !isPublic ? theme.colors.primary.main : '#f3f4f6' }
+              ]}
+            >
+              <LockClosedIcon size={24} color={!isPublic ? '#fff' : '#6b7280'} />
+            </View>
+            
+            <View className="flex-1 ml-4">
+              <Text className="text-lg font-bold mb-1" style={{ color: theme.colors.neutral.gray[900] }}>
+                Privates Profil
+              </Text>
+              <Text className="text-sm leading-5" style={{ color: theme.colors.neutral.gray[600] }}>
+                Nur bestätigte Freunde können dein Profil sehen. Mehr Kontrolle über deine Privatsphäre.
+              </Text>
+            </View>
+
+            {!isPublic && (
+              <View style={styles.checkmark}>
+                <Text className="text-white font-bold">✓</Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+
+        {/* Info Box */}
+        <View style={styles.infoBox} className="mt-8">
+          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[700] }}>
+            💡 Du kannst diese Einstellung jederzeit in deinem Profil ändern.
           </Text>
-          <ArrowRight size={24} color="#fff" />
+        </View>
+      </View>
+
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
+          >
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  optionCard: {
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#10b981',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  infoBox: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 16,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});

@@ -1,15 +1,27 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import {
-  Input, InputField,
-  FormControl, FormControlLabel, FormControlLabelText,
-  FormControlError, FormControlErrorIcon, FormControlErrorText,
-  FormControlHelper, FormControlHelperText
-} from '@gluestack-ui/themed';
-import { OctagonAlert, ArrowLeft, ArrowRight, Calendar } from 'lucide-react-native';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Age() {
   const router = useRouter();
@@ -18,16 +30,18 @@ export default function Age() {
   const [error, setError] = useState('');
 
   const validateAge = (text) => {
-    setAge(text);
+    // Only allow numbers
+    const numericText = text.replace(/[^0-9]/g, '');
+    setAge(numericText);
     setError('');
     
-    const numAge = parseInt(text);
-    if (text && isNaN(numAge)) {
-      setError('Bitte gib nur Zahlen ein');
-    } else if (numAge < 16) {
-      setError('Du musst mindestens 16 Jahre alt sein');
-    } else if (numAge > 99) {
-      setError('Bitte gib ein gültiges Alter ein');
+    if (numericText) {
+      const numAge = parseInt(numericText);
+      if (numAge < 16) {
+        setError('Mindestalter: 16 Jahre');
+      } else if (numAge > 99) {
+        setError('Bitte gültiges Alter eingeben');
+      }
     }
   };
 
@@ -42,113 +56,108 @@ export default function Age() {
   const isValid = age && parseInt(age) >= 16 && parseInt(age) <= 99;
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 justify-between px-6 py-10">
-        {/* Header */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
+        >
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
-          </View>
+        {/* Progress */}
+        <ProgressBar currentStep={2} totalSteps={10} />
 
-          {/* Titel */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Wie alt bist du?
-            </Text>
-          </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
-            Dein Alter hilft uns, dir passende Events und Locations zu zeigen.
-          </Text>
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Wie alt bist du?
+        </Text>
+        
+        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Dein Alter hilft uns, dir passende Events zu zeigen.
+        </Text>
+      </View>
 
-          {/* Progress Indicator */}
-          <View className="flex-row mb-8">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          {/* Input Field */}
-          <FormControl isInvalid={!!error && age.length > 0} size="md">
-            <FormControlLabel>
-              <FormControlLabelText>
-                Alter
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Input
-              className="my-2"
-              size="xl"
-              variant="outline"
-              style={{ borderColor: theme.colors.neutral.gray[300], borderWidth: 2 }}
-            >
-              <InputField
-                placeholder="z.B. 25"
-                value={age}
-                onChangeText={validateAge}
-                keyboardType="number-pad"
-                maxLength={2}
-                returnKeyType="next"
-                onSubmitEditing={handleNext}
-              />
-            </Input>
-
-            <FormControlHelper>
-              <FormControlHelperText style={{ color: theme.colors.neutral.gray[500] }}>
-                Du musst mindestens 16 Jahre alt sein
-              </FormControlHelperText>
-            </FormControlHelper>
-
-            {error && age.length > 0 && (
-              <FormControlError>
-                <FormControlErrorIcon as={OctagonAlert} style={{ color: theme.colors.error }} />
-                <FormControlErrorText style={{ color: theme.colors.error }}>
-                  {error}
-                </FormControlErrorText>
-              </FormControlError>
-            )}
-          </FormControl>
-
-          {/* Info Box */}
-          <View style={{ backgroundColor: theme.colors.accent.bg }} className="rounded-xl p-4 mt-6">
-            <Text style={{ color: theme.colors.neutral.gray[700] }} className="text-sm">
-              🔒 Dein Alter wird nur verwendet, um dir altersgerechte Events anzuzeigen und ist nicht öffentlich sichtbar.
-            </Text>
-          </View>
+      {/* Content */}
+      <View className="flex-1 px-6">
+        {/* Simple Input Box - Figma Style */}
+        <View style={styles.inputBox}>
+          <TextInput
+            value={age}
+            onChangeText={validateAge}
+            placeholder="Alter"
+            placeholderTextColor={theme.colors.neutral.gray[400]}
+            keyboardType="number-pad"
+            maxLength={2}
+            returnKeyType="next"
+            onSubmitEditing={handleNext}
+            style={styles.input}
+          />
         </View>
 
-        {/* Weiter Button */}
-        <Pressable
-          onPress={handleNext}
-          disabled={!isValid}
-          style={{
-            backgroundColor: isValid ? theme.colors.primary.main : theme.colors.neutral.gray[300]
-          }}
-          className="flex-row items-center justify-center px-6 py-4 rounded-2xl mb-8"
-        >
-          <Text
-            style={{ color: isValid ? '#fff' : theme.colors.neutral.gray[500] }}
-            className="text-lg font-bold mr-2"
-          >
-            Weiter
-          </Text>
-          <ArrowRight size={24} color={isValid ? '#fff' : '#9ca3af'} />
-        </Pressable>
+        {/* Helper Text */}
+        <Text className="text-sm mt-4" style={{ color: theme.colors.neutral.gray[500], fontFamily: 'Manrope_400Regular' }}>
+          Dies dient zur Personalisierung deines Erlebnisses und wird nicht in deinem Profil sichtbar sein.
+        </Text>
       </View>
+
+      {/* Round Continue Button - Bottom Right */}
+      {isValid && (
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  inputBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#d1d5db',
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+  },
+  input: {
+    fontSize: 18,
+    color: '#111827',
+    fontFamily: 'Manrope_400Regular',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});

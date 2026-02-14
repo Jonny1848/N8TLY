@@ -154,5 +154,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 11,
     fontWeight: '600',
+    fontFamily: 'Manrope_600SemiBold',
   },
 });

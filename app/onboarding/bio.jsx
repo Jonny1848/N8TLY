@@ -1,9 +1,27 @@
-import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react-native';
+import { ChevronLeftIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Bio() {
   const router = useRouter();
@@ -15,116 +33,132 @@ export default function Bio() {
     router.push('/onboarding/complete');
   };
 
-  const handleSkip = () => {
-    updateProfileData({ bio: '' });
-    router.push('/onboarding/complete');
-  };
-
-  const maxLength = 200;
+  const maxLength = 100;
 
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ backgroundColor: theme.colors.neutral.white }}
-      className="flex-1"
+      style={styles.container}
     >
-      <View className="flex-1 justify-between px-6 py-10">
-        <View className="">
-            <View className="flex-row items-center space-x-52">
-              <Pressable onPress={() => router.back()} className="p-2">
-                <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-              </Pressable>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
+        >
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-              <Image
-                source={require("../../assets/N8LY9.png")}
-                className="w-24 h-24"
-                resizeMode="contain"
-              />
-            </View>
+        {/* Progress */}
+        <ProgressBar currentStep={9} totalSteps={10} />
 
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Über dich
+        </Text>
+        
+        <Text className="text-lg mb-8" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          Erzähl anderen ein bisschen über dich! Was macht dich aus?
+        </Text>
+      </View>
 
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Über dich
-            </Text>
-          </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-8">
-            Erzähl anderen ein bisschen über dich! Was macht dich aus?
+      {/* Content */}
+      <View className="flex-1 px-6">
+        {/* Bio Input Card */}
+        <View style={styles.bioCard}>
+          <TextInput
+            placeholder="z.B. Techno-Enthusiast aus Berlin. Liebe Warehouse Partys und Festival-Season! 🎧✨"
+            value={bio}
+            onChangeText={setBio}
+            multiline
+            numberOfLines={6}
+            maxLength={maxLength}
+            textAlignVertical="top"
+            placeholderTextColor={theme.colors.neutral.gray[400]}
+            style={styles.bioInput}
+          />
+        </View>
+
+        {/* Character Counter */}
+        <View className="flex-row justify-between items-center mt-3 mb-6">
+          <Text className="text-sm" style={{ color: theme.colors.neutral.gray[500] }}>
+            {bio.length}/{maxLength} Zeichen
           </Text>
-
-          <View className="flex-row mb-8">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          <View
+          <Text
+            className="text-sm font-semibold"
             style={{
-              backgroundColor: theme.colors.neutral.white,
-              borderColor: theme.colors.accent.main,
-              borderWidth: 2
+              color: bio.length > 0 ? theme.colors.primary.main : theme.colors.neutral.gray[400]
             }}
-            className="rounded-2xl p-4 mb-3"
           >
-            <TextInput
-              placeholder="z.B. Techno-Enthusiast aus Berlin. Liebe Warehouse Partys und Festival-Season. Immer auf der Suche nach neuen Locations! 🎧✨"
-              value={bio}
-              onChangeText={setBio}
-              multiline
-              numberOfLines={6}
-              maxLength={maxLength}
-              textAlignVertical="top"
-              style={{ color: theme.colors.neutral.gray[900] }}
-              className="text-base min-h-32"
-              placeholderTextColor={theme.colors.neutral.gray[400]}
-            />
-          </View>
-
-          <View className="flex-row justify-between items-center mb-6">
-            <Text style={{ color: theme.colors.neutral.gray[500] }} className="text-sm">
-              {bio.length}/{maxLength} Zeichen
-            </Text>
-            <Text
-              style={{
-                color: bio.length > 0 ? theme.colors.accent.main : theme.colors.neutral.gray[400]
-              }}
-              className="text-sm font-medium"
-            >
-              {bio.length > 0 ? '✓ Optional' : 'Optional'}
-            </Text>
-          </View>
-
-          <View style={{ backgroundColor: theme.colors.accent.bg }} className="rounded-xl p-4">
-            <Text style={{ color: theme.colors.neutral.gray[700] }} className="text-sm mb-2 font-medium">
-              💡 Tipps für eine gute Bio:
-            </Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm mb-1">• Sei authentisch und positiv</Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm mb-1">• Lasse N8TLY-User wissen, wer du bist!</Text>
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-sm">• Verwende Emojis für mehr Persönlichkeit</Text>
-          </View>
+            {bio.length > 0 ? '✓ Optional' : 'Optional'}
+          </Text>
         </View>
-
-        <View className="space-y-3 mb-8">
-          <Pressable
-            onPress={handleNext}
-            style={{ backgroundColor: theme.colors.primary.main }}
-            className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
+      </View>
+      {/* Round Continue Button - Bottom Right */}
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={handleNext}>
+          <LinearGradient
+            colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.roundButton}
           >
-            <Text className="text-lg font-bold text-white mr-2">
-              {bio.length > 0 ? 'Weiter' : 'Ohne Bio fortfahren'}
-            </Text>
-            <ArrowRight size={24} color="#fff" />
-          </Pressable>
-        </View>
+            <ArrowRightIcon size={28} color="#fff" />
+          </LinearGradient>
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  bioCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    minHeight: 160,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  bioInput: {
+    fontSize: 16,
+    color: '#111827',
+    lineHeight: 22,
+    fontFamily: 'Manrope_400Regular',
+  },
+  tipsBox: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 16,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});

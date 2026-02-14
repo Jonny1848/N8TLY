@@ -1,8 +1,9 @@
-import { View, Text, Pressable, ScrollView, TextInput, Image} from 'react-native';
+import { View, Text, Pressable, ScrollView, TextInput, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
-import { ArrowLeft, ArrowRight, MapPin, Search } from 'lucide-react-native';
+import { ChevronLeftIcon, MagnifyingGlassIcon, ArrowRightIcon } from 'react-native-heroicons/outline';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 
 const GERMAN_CITIES = [
@@ -17,6 +18,23 @@ const GERMAN_CITIES = [
   'Heidelberg', 'Darmstadt', 'Regensburg', 'Würzburg', 'Ingolstadt',
   'Ulm', 'Heilbronn', 'Pforzheim', 'Göttingen', 'Offenbach', 'Recklinghausen'
 ];
+
+// Progress Bar Component
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  return (
+    <View className="flex-row gap-1 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          className="flex-1 h-1 rounded-full"
+          style={{
+            backgroundColor: index < currentStep ? theme.colors.primary.main : '#e5e7eb'
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function City() {
   const router = useRouter();
@@ -36,121 +54,151 @@ export default function City() {
   };
 
   return (
-    <View style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 px-6 py-10">
-        {/* Header */}
-        <View className="">
-          <View className="flex-row items-center space-x-52">
-            <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={28} color={theme.colors.neutral.gray[900]} />
-            </Pressable>
-
-            <Image
-              source={require("../../assets/N8LY9.png")}
-              className="w-24 h-24"
-              resizeMode="contain"
-            />
-          </View>
-
-
-          {/* Titel */}
-          <View className="flex-row items-center mb-3">
-            <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold">
-              Deine Stadt
-            </Text>
-          </View>
-          
-          <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg mb-6">
-            In welcher Stadt feierst du am liebsten?
-          </Text>
-
-          {/* Progress Indicator */}
-          <View className="flex-row mb-6">
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.primary.main }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full mr-1" />
-            <View style={{ backgroundColor: theme.colors.neutral.gray[200] }} className="flex-1 h-2 rounded-full" />
-          </View>
-
-          {/* Search Bar */}
-          <View
-            style={{
-              backgroundColor: theme.colors.neutral.white,
-              borderColor: theme.colors.accent.main,
-              borderWidth: 2
-            }}
-            className="flex-row items-center rounded-xl px-4 py-3 mb-4"
-          >
-            <Search size={20} color={theme.colors.neutral.gray[400]} />
-            <TextInput
-              placeholder="Stadt suchen..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              style={{ color: theme.colors.neutral.gray[900] }}
-              className="flex-1 ml-3 text-base"
-              placeholderTextColor={theme.colors.neutral.gray[400]}
-            />
-          </View>
-        </View>
-
-        {/* Cities Grid */}
-        <ScrollView 
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View className="px-6 pt-12 pb-6">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="mb-6"
+          style={styles.backButton}
         >
-          <View className="flex-row flex-wrap pb-24">
-            {filteredCities.map((city) => (
-              <Pressable
-                key={city}
-                onPress={() => setSelectedCity(city)}
-                style={{
-                  backgroundColor: selectedCity === city ? theme.colors.accent.main : theme.colors.neutral.white,
-                  borderColor: theme.colors.neutral.gray[300],
-                  borderWidth: selectedCity === city ? 0 : 2
-                }}
-                className="px-6 py-3 rounded-full m-1"
-              >
-                <Text
-                  style={{
-                    color: selectedCity === city ? '#fff' : theme.colors.neutral.gray[700]
-                  }}
-                  className="text-base font-medium"
-                >
-                  {city}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
+          <ChevronLeftIcon size={28} color={theme.colors.neutral.gray[900]} />
+        </Pressable>
 
-        {/* Weiter Button - Fixed at bottom */}
-        <View className="absolute bottom-0 left-0 right-0 px-6 pb-8 bg-white">
-          <Pressable
-            onPress={handleNext}
-            disabled={!selectedCity}
-            style={{
-              backgroundColor: selectedCity ? theme.colors.primary.main : theme.colors.neutral.gray[300]
-            }}
-            className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
-          >
-            <Text
-              style={{
-                color: selectedCity ? '#fff' : theme.colors.neutral.gray[500]
-              }}
-              className="text-lg font-bold mr-2"
-            >
-              Weiter
-            </Text>
-            <ArrowRight size={24} color={selectedCity ? '#fff' : '#9ca3af'} />
-          </Pressable>
+        {/* Progress */}
+        <ProgressBar currentStep={4} totalSteps={10} />
+
+        {/* Title */}
+        <Text className="text-4xl font-bold mb-3" style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}>
+          Deine Stadt
+        </Text>
+        
+        <Text className="text-lg mb-6" style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_400Regular' }}>
+          In welcher Stadt feierst du am liebsten?
+        </Text>
+
+        {/* Search Bar */}
+        <View style={styles.searchBar}>
+          <MagnifyingGlassIcon size={20} color={theme.colors.neutral.gray[400]} />
+          <TextInput
+            placeholder="Stadt suchen..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={theme.colors.neutral.gray[400]}
+            style={styles.searchInput}
+          />
         </View>
       </View>
+
+      {/* Cities Grid */}
+      <ScrollView 
+        className="flex-1 px-6"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-row flex-wrap mb-32">
+          {filteredCities.map((city) => (
+            <Pressable
+              key={city}
+              onPress={() => setSelectedCity(city)}
+              style={[
+                styles.cityChip,
+                {
+                  backgroundColor: selectedCity === city ? theme.colors.primary.main : '#fff',
+                  borderColor: selectedCity === city ? theme.colors.primary.main : '#e5e7eb',
+                }
+              ]}
+            >
+              <Text
+                className="font-medium"
+                style={{
+                  color: selectedCity === city ? '#fff' : theme.colors.neutral.gray[700],
+                  fontSize: 15,
+                  fontFamily: 'Manrope_500Medium',
+                }}
+              >
+                {city}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* Round Continue Button - Bottom Right */}
+      {selectedCity && (
+        <View style={styles.buttonContainerFixed}>
+          <Pressable onPress={handleNext}>
+            <LinearGradient
+              colors={[theme.colors.primary.main, theme.colors.primary.main2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.roundButton}
+            >
+              <ArrowRightIcon size={28} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: '#111827',
+    fontFamily: 'Manrope_400Regular',
+  },
+  cityChip: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    margin: 4,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  buttonContainerFixed: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+  },
+  roundButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});

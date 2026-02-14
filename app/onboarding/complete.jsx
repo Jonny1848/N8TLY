@@ -1,11 +1,11 @@
-import { View, Text, Pressable, ActivityIndicator, Image, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../components/OnboardingContext';
 import { supabase } from '../../lib/supabase';
-import { CheckCircle, Sparkles, AlertCircle } from 'lucide-react-native';
+import { ExclamationCircleIcon } from 'react-native-heroicons/solid';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
-import { useEffect } from 'react';
 
 
 export default function Complete() {
@@ -80,7 +80,7 @@ export default function Complete() {
 
       // Reset context und navigiere zu Home
       resetProfileData();
-      router.replace('/home');
+      router.replace('/tabs');
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
       setError(err.message || 'Ein Fehler ist aufgetreten');
@@ -89,121 +89,224 @@ export default function Complete() {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: theme.colors.neutral.white }} className="flex-1">
-      <View className="flex-1 justify-center items-center px-6 py-10">
-        {/* Success Icon */}
-        <View className="items-center mb-8">
-          <View style={{ backgroundColor: theme.colors.accent.bg }} className="rounded-full p-6 mb-6">
-            <CheckCircle size={80} color={theme.colors.accent.main} />
-          </View>
-        </View>
-
+    <View className="flex-1 bg-white">
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 120, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Titel */}
-        <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-4xl font-bold text-center mb-4">
+        <Text 
+          className="text-4xl font-bold text-center mb-3"
+          style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}
+        >
           Fast geschafft!
         </Text>
         
-        <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-lg text-center mb-12">
-          Dein Profil ist bereit. Lass uns die Party starten! 🎉
+        <Text 
+          className="text-lg text-center mb-10"
+          style={{ 
+            color: theme.colors.neutral.gray[600], 
+            fontFamily: 'Manrope_400Regular',
+            lineHeight: 24 
+          }}
+        >
+          Dein N8LY-Profil ist bereit.
         </Text>
 
-        {/* Zusammenfassung */}
-        <View
-          style={{
-            backgroundColor: theme.colors.neutral.white,
-            borderColor: theme.colors.neutral.gray[200],
-            borderWidth: 2
-          }}
-          className="w-full rounded-2xl p-6 mb-8"
+        {/* Zusammenfassung Card */}
+        <View 
+          className="bg-white rounded-2xl p-6 mb-6"
+          style={styles.summaryCard}
         >
-          <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-lg font-bold mb-4">
-            Dein Profil im Überblick:
+          <Text 
+            className="text-xl font-bold mb-5"
+            style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_700Bold' }}
+          >
+            Dein Profil im Überblick
           </Text>
           
-          <View className="space-y-3">
-            <View className="flex-row items-center">
-              <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">👤 Benutzername:</Text>
-              <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-base font-semibold ml-2">
-                @{profileData.username}
-              </Text>
-            </View>
-            
-            <View className="flex-row items-center">
-              <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">🎂 Alter:</Text>
-              <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-base font-semibold ml-2">
-                {profileData.age} Jahre
-              </Text>
-            </View>
-            
-            <View className="flex-row items-center">
-              <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">📍 Stadt:</Text>
-              <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-base font-semibold ml-2">
-                {profileData.favoriteCity}
-              </Text>
-            </View>
-            
-            <View className="flex-row">
-              <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">🎵 Musikgenres:</Text>
-              <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-base font-semibold ml-2 flex-1 flex-wrap">
-                {profileData.musicGenres.join(', ')}
-              </Text>
-            </View>
-            
-            <View className="flex-row">
-              <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">🎉 Party-Typen:</Text>
-              <Text style={{ color: theme.colors.neutral.gray[900] }} className="text-base font-semibold ml-2 flex-1 flex-wrap">
-                {profileData.partyPreferences.join(', ')}
-              </Text>
-            </View>
+          <View 
+            className="flex-row justify-between items-center py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.neutral.gray[100] }}
+          >
+            <Text 
+              className="text-base"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_500Medium' }}
+            >
+              Benutzername
+            </Text>
+            <Text 
+              className="text-base font-semibold flex-1 text-right ml-4"
+              style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_600SemiBold' }}
+            >
+              @{profileData.username}
+            </Text>
+          </View>
+          
+          <View 
+            className="flex-row justify-between items-center py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.neutral.gray[100] }}
+          >
+            <Text 
+              className="text-base"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_500Medium' }}
+            >
+              Alter
+            </Text>
+            <Text 
+              className="text-base font-semibold flex-1 text-right ml-4"
+              style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_600SemiBold' }}
+            >
+              {profileData.age} Jahre
+            </Text>
+          </View>
+          
+          <View 
+            className="flex-row justify-between items-center py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.neutral.gray[100] }}
+          >
+            <Text 
+              className="text-base"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_500Medium' }}
+            >
+              Stadt
+            </Text>
+            <Text 
+              className="text-base font-semibold flex-1 text-right ml-4"
+              style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_600SemiBold' }}
+            >
+              {profileData.favoriteCity}
+            </Text>
+          </View>
+          
+          <View 
+            className="flex-row justify-between items-center py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.neutral.gray[100] }}
+          >
+            <Text 
+              className="text-base"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_500Medium' }}
+            >
+              Musikgenres
+            </Text>
+            <Text 
+              className="text-base font-semibold flex-1 text-right ml-4"
+              style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_600SemiBold' }}
+            >
+              {profileData.musicGenres.slice(0, 3).join(', ')}
+            </Text>
+          </View>
+          
+          <View 
+            className="flex-row justify-between items-center py-3"
+            style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.neutral.gray[100] }}
+          >
+            <Text 
+              className="text-base"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_500Medium' }}
+            >
+              Party-Typen
+            </Text>
+            <Text 
+              className="text-base font-semibold flex-1 text-right ml-4"
+              style={{ color: theme.colors.neutral.gray[900], fontFamily: 'Manrope_600SemiBold' }}
+            >
+              {profileData.partyPreferences.slice(0, 3).join(', ')}
+            </Text>
           </View>
         </View>
 
         {/* Error Message */}
         {error && (
-          <View
+          <View 
+            className="flex-row items-center rounded-xl p-4 mb-6"
             style={{ backgroundColor: theme.colors.error + '15' }}
-            className="w-full rounded-xl p-4 mb-6 flex-row items-start"
           >
-            <AlertCircle size={20} color={theme.colors.error} className="mr-2 mt-0.5" />
-            <Text style={{ color: theme.colors.error }} className="text-sm flex-1">{error}</Text>
+            <ExclamationCircleIcon size={20} color={theme.colors.error} />
+            <Text 
+              className="flex-1 text-sm ml-3"
+              style={{ color: theme.colors.error, fontFamily: 'Manrope_500Medium' }}
+            >
+              {error}
+            </Text>
           </View>
         )}
 
-        {/* Buttons */}
-        <View className="w-full space-y-3">
+        {/* Complete Button */}
+        <View className="mt-2">
           <Pressable
             onPress={handleComplete}
             disabled={loading}
-            style={{
-              backgroundColor: loading ? theme.colors.primary.light : theme.colors.primary.main
-            }}
-            className="flex-row items-center justify-center px-6 py-4 rounded-2xl"
+            className="mb-4"
           >
-            {loading ? (
-              <>
-                <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-lg font-bold text-white ml-3">
-                  Profil wird erstellt...
+            <LinearGradient
+              colors={loading 
+                ? [theme.colors.neutral.gray[400], theme.colors.neutral.gray[400]]
+                : [theme.colors.primary.main, theme.colors.primary.main2]
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientButton}
+            >
+              {loading ? (
+                <View className="flex-row items-center">
+                  <ActivityIndicator size="small" color="#fff" />
+                  <Text 
+                    className="text-lg font-bold text-white ml-3"
+                    style={{ fontFamily: 'Manrope_700Bold' }}
+                  >
+                    Profil wird erstellt...
+                  </Text>
+                </View>
+              ) : (
+                <Text 
+                  className="text-lg font-bold text-white"
+                  style={{ fontFamily: 'Manrope_700Bold' }}
+                >
+                  Profil vervollständigen 🚀
                 </Text>
-              </>
-            ) : (
-              <Text className="text-lg font-bold text-white">
-                Profil vervollständigen 🚀
-              </Text>
-            )}
+              )}
+            </LinearGradient>
           </Pressable>
 
           <Pressable
             onPress={() => router.back()}
             disabled={loading}
-            className="flex-row items-center justify-center px-6 py-4"
+            className="items-center py-4"
           >
-            <Text style={{ color: theme.colors.neutral.gray[600] }} className="text-base">
+            <Text 
+              className="text-base font-semibold"
+              style={{ color: theme.colors.neutral.gray[600], fontFamily: 'Manrope_600SemiBold' }}
+            >
               Zurück zum Bearbeiten
             </Text>
           </Pressable>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  summaryCard: {
+    borderWidth: 1.5,
+    borderColor: theme.colors.neutral.gray[200],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  gradientButton: {
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.colors.primary.main,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+});
