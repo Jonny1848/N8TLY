@@ -78,7 +78,14 @@ export default {
       "expo-apple-authentication",
       "expo-router",
       "expo-video",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          // iOS Mikrofon-Permission fuer Sprachnachrichten
+          microphonePermission:
+            "N8TLY benoetigt Zugriff auf dein Mikrofon fuer Sprachnachrichten.",
+        },
+      ],
       [
         "@rnmapbox/maps",
         {

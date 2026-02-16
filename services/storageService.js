@@ -65,11 +65,11 @@ export async function uploadChatImage(conversationId, uri, mimeType = 'image/jpe
  *
  * @param {string} conversationId – Die UUID der Konversation
  * @param {string} uri – Der lokale Dateipfad der Aufnahme
- * @param {string} mimeType – Der MIME-Typ (z.B. 'audio/webm')
+ * @param {string} mimeType – Der MIME-Typ (Standard: 'audio/m4a' fuer expo-audio HIGH_QUALITY)
  * @returns {string} – Die oeffentliche URL der Sprachnachricht
  */
-export async function uploadVoiceMessage(conversationId, uri, mimeType = 'audio/webm') {
-  const fileExtension = mimeType.split('/')[1] || 'webm';
+export async function uploadVoiceMessage(conversationId, uri, mimeType = 'audio/m4a') {
+  const fileExtension = mimeType.split('/')[1] || 'm4a';
   const fileName = `voice_${Date.now()}.${fileExtension}`;
   const filePath = `${conversationId}/${fileName}`;
 

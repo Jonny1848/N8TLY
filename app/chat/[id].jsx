@@ -12,7 +12,7 @@
  *
  * Route: /chat/[id] – Die ID ist die conversation_id aus Supabase.
  */
-import { View, Text, FlatList, TextInput, Pressable, Image, KeyboardAvoidingView, Platform, StyleSheet, Modal, Animated, Dimensions } from 'react-native';
+import { View, Text, FlatList, TextInput, Pressable, Image, KeyboardAvoidingView, Platform, StyleSheet, Modal, Animated, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -22,12 +22,14 @@ import {
   getConversationById,
   getMessages,
   sendMessage,
+  sendMediaMessage,
   subscribeToMessages,
   unsubscribeFromMessages,
   markConversationAsRead,
 } from '../../services/chatService';
+import { uploadVoiceMessage } from '../../services/storageService';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
-import { PaperAirplaneIcon, UserIcon } from 'react-native-heroicons/solid';
+import { PaperAirplaneIcon, UserIcon, PlayIcon, StopIcon, PauseIcon } from 'react-native-heroicons/solid';
 import {
   PaperClipIcon,
   CameraIcon,
@@ -39,8 +41,87 @@ import {
   ChartBarIcon,
   PhotoIcon,
   MapPinIcon,
+  TrashIcon,
 } from 'react-native-heroicons/outline';
 import { UserGroupIcon } from 'react-native-heroicons/solid';
+// expo-audio: Aufnahme und Wiedergabe fuer Sprachnachrichten
+import {
+  useAudioRecorder,
+  useAudioRecorderState,
+  AudioModule,
+  RecordingPresets,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from 'expo-audio';
+
+// ============================
+// VoiceMessageBubble – Eigene Komponente fuer die Wiedergabe von Sprachnachrichten
+// Muss separat sein, da Hooks (useAudioPlayer) nicht in renderItem genutzt werden koennen
+// ============================
+function VoiceMessageBubble({ mediaUrl, isOwn }) {
+  // Audio-Player fuer diese spezifische Sprachnachricht
+  const player = useAudioPlayer(mediaUrl);
+  const status = useAudioPlayerStatus(player);
+
+  /** Play/Pause umschalten */
+  const togglePlayback = () => {
+    if (status.playing) {
+      player.pause();
+    } else {
+      // Wenn am Ende: Zurueckspulen und abspielen
+      if (status.currentTime >= status.duration && status.duration > 0) {
+        player.seekTo(0);
+      }
+      player.play();
+    }
+  };
+
+  // Dauer formatieren (mm:ss)
+  const formatDuration = (seconds) => {
+    const s = Math.round(seconds || 0);
+    const min = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // Fortschritt als Prozentsatz (0-1)
+  const progress = status.duration > 0 ? status.currentTime / status.duration : 0;
+
+  return (
+    <View style={voiceStyles.container}>
+      {/* Play/Pause Button */}
+      <Pressable onPress={togglePlayback} style={voiceStyles.playBtn}>
+        {status.playing ? (
+          <PauseIcon size={16} color={isOwn ? '#FFFFFF' : theme.colors.primary.main} />
+        ) : (
+          <PlayIcon size={16} color={isOwn ? '#FFFFFF' : theme.colors.primary.main} />
+        )}
+      </Pressable>
+
+      {/* Fortschrittsbalken + Dauer */}
+      <View style={voiceStyles.progressArea}>
+        {/* Hintergrund-Track */}
+        <View style={[voiceStyles.track, {
+          backgroundColor: isOwn ? 'rgba(255,255,255,0.3)' : theme.colors.neutral.gray[200],
+        }]}>
+          {/* Gefuellter Fortschritt */}
+          <View style={[voiceStyles.trackFill, {
+            width: `${progress * 100}%`,
+            backgroundColor: isOwn ? '#FFFFFF' : theme.colors.primary.main,
+          }]} />
+        </View>
+        {/* Zeitanzeige: Aktuelle Position / Gesamtdauer */}
+        <Text style={[voiceStyles.duration, {
+          color: isOwn ? 'rgba(255,255,255,0.7)' : theme.colors.neutral.gray[500],
+        }]}>
+          {status.playing || status.currentTime > 0
+            ? formatDuration(status.currentTime)
+            : formatDuration(status.duration)}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 export default function ChatDetailScreen() {
   // Konversations-ID aus der Route
@@ -63,8 +144,31 @@ export default function ChatDetailScreen() {
   const [shareSheetVisible, setShareSheetVisible] = useState(false);
   const shareSheetAnim = useRef(new Animated.Value(0)).current;
 
+  // ============================
+  // Sprachnachrichten: Aufnahme-States und Hooks
+  // ============================
+  const [recording, setRecording] = useState(false);
+  const [recordedUri, setRecordedUri] = useState(null);
+  const [uploadingVoice, setUploadingVoice] = useState(false);
+
+  // expo-audio Recorder Hook (HIGH_QUALITY = .m4a, 44100Hz, AAC)
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder, 200);
+
+  // Audio-Player fuer die Vorschau der eigenen Aufnahme (vor dem Senden)
+  const previewPlayer = useAudioPlayer(recordedUri);
+  const previewStatus = useAudioPlayerStatus(previewPlayer);
+
   // Prueft ob der Send-Button angezeigt werden soll
   const hasContent = inputText.trim().length > 0;
+
+  // Hilfsfunktion: Dauer in mm:ss formatieren
+  const formatRecordingTime = (millis) => {
+    const totalSec = Math.floor((millis || 0) / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  };
 
   // ============================
   // Initialisierung: User, Chat-Daten und Realtime
@@ -157,6 +261,94 @@ export default function ChatDetailScreen() {
   };
 
   // ============================
+  // Sprachnachricht: Aufnahme starten
+  // ============================
+  const handleStartRecording = async () => {
+    try {
+      // Mikrofon-Berechtigung pruefen und anfordern
+      const permStatus = await AudioModule.requestRecordingPermissionsAsync();
+      if (!permStatus.granted) {
+        console.warn('[VOICE] Mikrofon-Berechtigung verweigert');
+        return;
+      }
+      // Aufnahme vorbereiten und starten
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
+      setRecording(true);
+      setRecordedUri(null);
+    } catch (err) {
+      console.error('[VOICE] Fehler beim Starten der Aufnahme:', err);
+    }
+  };
+
+  // ============================
+  // Sprachnachricht: Aufnahme stoppen (wechselt in Preview-Modus)
+  // ============================
+  const handleStopRecording = async () => {
+    try {
+      await audioRecorder.stop();
+      setRecording(false);
+      // URI der Aufnahme fuer Vorschau speichern
+      setRecordedUri(audioRecorder.uri);
+    } catch (err) {
+      console.error('[VOICE] Fehler beim Stoppen der Aufnahme:', err);
+      setRecording(false);
+    }
+  };
+
+  // ============================
+  // Sprachnachricht: Aufnahme verwerfen (zurueck zur normalen Eingabe)
+  // ============================
+  const handleDiscardRecording = () => {
+    setRecording(false);
+    setRecordedUri(null);
+    // Preview-Player stoppen falls er laeuft
+    if (previewStatus.playing) {
+      previewPlayer.pause();
+    }
+  };
+
+  // ============================
+  // Sprachnachricht: Hochladen und als Nachricht senden
+  // ============================
+  const handleSendVoice = async () => {
+    const uri = recordedUri || audioRecorder.uri;
+    if (!uri || !userId || uploadingVoice) return;
+
+    setUploadingVoice(true);
+    try {
+      // 1. Audio-Datei zu Supabase Storage hochladen
+      const publicUrl = await uploadVoiceMessage(conversationId, uri, 'audio/m4a');
+      // 2. Nachricht mit media_url und Typ 'voice' in der DB speichern
+      const msg = await sendMediaMessage(conversationId, userId, publicUrl, 'voice');
+      // 3. Lokal hinzufuegen (optimistic UI)
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [{ ...msg, profiles: { id: userId } }, ...prev];
+      });
+      // 4. State zuruecksetzen
+      setRecordedUri(null);
+      setRecording(false);
+    } catch (err) {
+      console.error('[VOICE] Fehler beim Senden der Sprachnachricht:', err);
+    } finally {
+      setUploadingVoice(false);
+    }
+  };
+
+  /** Preview-Wiedergabe umschalten (Play/Pause) */
+  const togglePreviewPlayback = () => {
+    if (previewStatus.playing) {
+      previewPlayer.pause();
+    } else {
+      if (previewStatus.currentTime >= previewStatus.duration && previewStatus.duration > 0) {
+        previewPlayer.seekTo(0);
+      }
+      previewPlayer.play();
+    }
+  };
+
+  // ============================
   // Share Sheet oeffnen/schliessen (Slide-up Animation)
   // ============================
 
@@ -186,13 +378,8 @@ export default function ChatDetailScreen() {
   const screenHeight = Dimensions.get('window').height;
 
   // Share-Optionen: Jede Option hat ein Icon, Label, Beschreibung und ggf. eine Bedingung
+  // Kamera ist hier NICHT enthalten – dafuer gibt es den separaten Kamera-Button in der Input Bar
   const shareOptions = [
-    {
-      key: 'camera',
-      icon: <CameraIcon size={24} strokeWidth={1.8} color={theme.colors.neutral.gray[700]} />,
-      label: 'Kamera',
-      subtitle: null,
-    },
     {
       key: 'documents',
       icon: <DocumentIcon size={24} strokeWidth={1.8} color={theme.colors.neutral.gray[700]} />,
@@ -329,15 +516,19 @@ export default function ChatDetailScreen() {
                 </Text>
               )}
 
-              {/* Nachrichtentext */}
-              <Text
-                style={[
-                  styles.messageText,
-                  { color: isOwn ? '#FFFFFF' : theme.colors.neutral.gray[900] },
-                ]}
-              >
-                {item.content}
-              </Text>
+              {/* Nachrichteninhalt: Text oder Sprachnachricht */}
+              {item.message_type === 'voice' && item.media_url ? (
+                <VoiceMessageBubble mediaUrl={item.media_url} isOwn={isOwn} />
+              ) : (
+                <Text
+                  style={[
+                    styles.messageText,
+                    { color: isOwn ? '#FFFFFF' : theme.colors.neutral.gray[900] },
+                  ]}
+                >
+                  {item.content}
+                </Text>
+              )}
 
               {/* Zeitstempel rechts unten */}
               <Text
@@ -441,60 +632,134 @@ export default function ChatDetailScreen() {
         />
 
         {/* ============================================
-            BOTTOM BAR: Chatbox-Style Eingabebereich
-            Links: Attachment + Kamera
-            Mitte: Eingabefeld mit Emoji-Icon
-            Rechts: Sende-Button (nur bei Inhalt sichtbar)
+            BOTTOM BAR: Drei Modi
+            1. Normal: Attachment, Eingabe, Kamera, Mikrofon, Send
+            2. Recording: Verwerfen, Timer mit Puls, Stopp
+            3. Preview: Verwerfen, Play/Pause + Dauer, Senden
             ============================================ */}
         <View style={styles.inputBar}>
-          <View style={styles.inputRow}>
-            {/* Attachment-Button – oeffnet das "Share Content" Bottom Sheet */}
-            <Pressable style={styles.inputAction} onPress={openShareSheet}>
-              <PaperClipIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
-            </Pressable>
+          {recording ? (
+            /* ========== RECORDING-MODUS ========== */
+            <View style={styles.inputRow}>
+              {/* Verwerfen-Button (Aufnahme abbrechen) */}
+              <Pressable style={styles.inputAction} onPress={handleDiscardRecording}>
+                <TrashIcon size={24} strokeWidth={2} color="#EF4444" />
+              </Pressable>
 
-            {/* Eingabefeld mit Emoji-Icon rechts darin */}
-            <View style={styles.inputFieldContainer}>
-              <TextInput
-                style={styles.inputField}
-                placeholder="Nachricht schreiben..."
-                placeholderTextColor={theme.colors.neutral.gray[400]}
-                value={inputText}
-                onChangeText={setInputText}
-                multiline
-                maxLength={2000}
-              />
-              {/* Emoji-Button innerhalb des Eingabefelds (rechte Seite) */}
-              <Pressable style={styles.emojiBtn}>
-                <FaceSmileIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[500]} />
+              {/* Timer-Anzeige mit rotem Puls-Punkt */}
+              <View style={recStyles.timerContainer}>
+                <View style={recStyles.pulseCircle} />
+                <Text style={recStyles.timerText}>
+                  {formatRecordingTime(recorderState.durationMillis)}
+                </Text>
+                <Text style={recStyles.timerLabel}>Aufnahme...</Text>
+              </View>
+
+              {/* Stopp-Button (Aufnahme beenden → Vorschau) */}
+              <Pressable
+                style={[styles.sendBtn, { backgroundColor: '#EF4444' }]}
+                onPress={handleStopRecording}
+              >
+                <StopIcon size={18} color="#FFFFFF" />
               </Pressable>
             </View>
-
-            {/* Kamera-Button (Foto aufnehmen) – nur sichtbar wenn kein Text eingegeben */}
-            {!hasContent && (
-              <Pressable style={styles.inputAction}>
-                <CameraIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
+          ) : recordedUri ? (
+            /* ========== PREVIEW-MODUS (Aufnahme fertig, noch nicht gesendet) ========== */
+            <View style={styles.inputRow}>
+              {/* Verwerfen-Button (Aufnahme loeschen) */}
+              <Pressable style={styles.inputAction} onPress={handleDiscardRecording}>
+                <TrashIcon size={24} strokeWidth={2} color="#EF4444" />
               </Pressable>
-            )}
 
-            {/* Mikrofon-Button (Sprachnachricht) – nur sichtbar wenn kein Text eingegeben */}
-            {!hasContent && (
-              <Pressable style={styles.inputAction}>
-                <MicrophoneIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
-              </Pressable>
-            )}
+              {/* Play/Pause + Fortschrittsbalken */}
+              <View style={recStyles.previewContainer}>
+                <Pressable onPress={togglePreviewPlayback} style={recStyles.previewPlayBtn}>
+                  {previewStatus.playing ? (
+                    <PauseIcon size={16} color={theme.colors.primary.main} />
+                  ) : (
+                    <PlayIcon size={16} color={theme.colors.primary.main} />
+                  )}
+                </Pressable>
+                {/* Fortschrittsbalken */}
+                <View style={recStyles.previewTrack}>
+                  <View style={[recStyles.previewTrackFill, {
+                    width: `${previewStatus.duration > 0 ? (previewStatus.currentTime / previewStatus.duration) * 100 : 0}%`,
+                  }]} />
+                </View>
+                {/* Dauer-Anzeige */}
+                <Text style={recStyles.previewDuration}>
+                  {formatRecordingTime(
+                    previewStatus.playing || previewStatus.currentTime > 0
+                      ? previewStatus.currentTime * 1000
+                      : (previewStatus.duration || 0) * 1000
+                  )}
+                </Text>
+              </View>
 
-            {/* Sende-Button: Erscheint NUR wenn Text vorhanden ist (Chatbox-Pattern) */}
-            {hasContent && (
+              {/* Sende-Button (Sprachnachricht hochladen & senden) */}
               <Pressable
                 style={[styles.sendBtn, { backgroundColor: theme.colors.primary.main }]}
-                onPress={handleSend}
-                disabled={sending}
+                onPress={handleSendVoice}
+                disabled={uploadingVoice}
               >
-                <PaperAirplaneIcon size={20} strokeWidth={2.5} color="#FFFFFF" />
+                {uploadingVoice ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <PaperAirplaneIcon size={20} strokeWidth={2.5} color="#FFFFFF" />
+                )}
               </Pressable>
-            )}
-          </View>
+            </View>
+          ) : (
+            /* ========== NORMALER MODUS (Standard-Eingabe) ========== */
+            <View style={styles.inputRow}>
+              {/* Attachment-Button – oeffnet das "Share Content" Bottom Sheet */}
+              <Pressable style={styles.inputAction} onPress={openShareSheet}>
+                <PaperClipIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
+              </Pressable>
+
+              {/* Eingabefeld mit Emoji-Icon rechts darin */}
+              <View style={styles.inputFieldContainer}>
+                <TextInput
+                  style={styles.inputField}
+                  placeholder="Nachricht schreiben..."
+                  placeholderTextColor={theme.colors.neutral.gray[400]}
+                  value={inputText}
+                  onChangeText={setInputText}
+                  multiline
+                  maxLength={2000}
+                />
+                {/* Emoji-Button innerhalb des Eingabefelds (rechte Seite) */}
+                <Pressable style={styles.emojiBtn}>
+                  <FaceSmileIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[500]} />
+                </Pressable>
+              </View>
+
+              {/* Kamera-Button (Foto aufnehmen) – nur sichtbar wenn kein Text eingegeben */}
+              {!hasContent && (
+                <Pressable style={styles.inputAction}>
+                  <CameraIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
+                </Pressable>
+              )}
+
+              {/* Mikrofon-Button – startet Sprachaufnahme */}
+              {!hasContent && (
+                <Pressable style={styles.inputAction} onPress={handleStartRecording}>
+                  <MicrophoneIcon size={26} strokeWidth={2} color={theme.colors.neutral.gray[600]} />
+                </Pressable>
+              )}
+
+              {/* Sende-Button: Erscheint NUR wenn Text vorhanden ist (Chatbox-Pattern) */}
+              {hasContent && (
+                <Pressable
+                  style={[styles.sendBtn, { backgroundColor: theme.colors.primary.main }]}
+                  onPress={handleSend}
+                  disabled={sending}
+                >
+                  <PaperAirplaneIcon size={20} strokeWidth={2.5} color="#FFFFFF" />
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
 
         {/* SafeArea-Padding unten (Home-Indicator auf neueren iPhones) */}
@@ -812,5 +1077,129 @@ const shareStyles = StyleSheet.create({
     fontFamily: 'Manrope_400Regular',
     color: theme.colors.neutral.gray[500],
     marginTop: 2,
+  },
+});
+
+// ============================
+// Styles: Aufnahme-Modus und Preview-Modus (Bottom Bar)
+// ============================
+const recStyles = StyleSheet.create({
+  // -- RECORDING MODUS --
+  // Container fuer den Timer (roter Punkt + Zeit + Label)
+  timerContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+  },
+  // Roter pulsierender Aufnahme-Punkt
+  pulseCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#EF4444',
+    marginRight: 8,
+  },
+  // Aufnahmedauer (z.B. "0:12")
+  timerText: {
+    fontSize: 18,
+    fontFamily: 'Manrope_700Bold',
+    color: theme.colors.neutral.gray[900],
+    marginRight: 8,
+  },
+  // "Aufnahme..." Label
+  timerLabel: {
+    fontSize: 13,
+    fontFamily: 'Manrope_400Regular',
+    color: theme.colors.neutral.gray[500],
+  },
+
+  // -- PREVIEW MODUS --
+  // Container fuer Play-Button + Fortschrittsbalken + Dauer
+  previewContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.neutral.gray[100],
+    borderRadius: 24,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginHorizontal: 8,
+  },
+  // Play/Pause Button in der Vorschau
+  previewPlayBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  // Fortschrittsbalken-Track (Hintergrund)
+  previewTrack: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.neutral.gray[200],
+    overflow: 'hidden',
+  },
+  // Fortschrittsbalken-Fuellung
+  previewTrackFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: theme.colors.primary.main,
+  },
+  // Zeitanzeige in der Vorschau
+  previewDuration: {
+    fontSize: 12,
+    fontFamily: 'Manrope_600SemiBold',
+    color: theme.colors.neutral.gray[600],
+    marginLeft: 10,
+    minWidth: 32,
+  },
+});
+
+// ============================
+// Styles: VoiceMessageBubble (Wiedergabe in Nachrichten)
+// ============================
+const voiceStyles = StyleSheet.create({
+  // Gesamtcontainer der Sprachnachricht
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 180,
+  },
+  // Runder Play/Pause-Button
+  playBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  // Bereich fuer Fortschrittsbalken + Dauer
+  progressArea: {
+    flex: 1,
+  },
+  // Hintergrund-Track des Fortschrittsbalkens
+  track: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  // Gefuellter Teil des Fortschrittsbalkens
+  trackFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  // Daueranzeige unter dem Balken
+  duration: {
+    fontSize: 11,
+    fontFamily: 'Manrope_500Medium',
   },
 });
