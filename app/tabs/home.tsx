@@ -10,9 +10,11 @@ import { useAudioPlayer } from 'expo-audio';
 import { FilterBottomSheet } from '../../components/FilterBottomSheet';
 import { supabase } from '../../lib/supabase'; 
 
-const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
+// Mapbox Access Token aus Umgebungsvariable lesen (definiert in .env)
+const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
-MapboxGL.setAccessToken("sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ");
+// Mapbox SDK mit dem Token initialisieren
+MapboxGL.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 const MAP_STYLE_DARK = "mapbox://styles/jonny2005/cmiag4rgh00eb01s90y2r7qw0";
 const MAP_STYLE_LIGHT = "mapbox://styles/mapbox/light-v11";
@@ -37,6 +39,8 @@ export default function HomeScreen() {
   const cameraRef = useRef<MapboxGL.Camera>(null);
   const mapRef = useRef<MapboxGL.MapView>(null);
   const flightPlayer = useAudioPlayer(require('../../assets/flight.mp3'));
+
+  
 
   const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
 
@@ -141,6 +145,7 @@ export default function HomeScreen() {
   // ============================
   const playFlightSound = () => {
     try {
+      flightPlayer.volume = 0.2;
       flightPlayer.seekTo(0);
       flightPlayer.play();
     } catch {}

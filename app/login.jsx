@@ -413,7 +413,7 @@ export default function Login() {
               onPress={signInWithGoogle}
               className="w-14 h-14 rounded-full bg-white border border-gray-200 items-center justify-center"
             >
-              <Image source={require("../assets/google.png")} className="w-6 h-6" />
+              <Image source={require("../assets/3d_icon_google.png")} className="w-20 h-20" resizeMode="contain" />
             </TouchableOpacity>
 
             {/* Apple (nur iOS, nativer Flow) */}

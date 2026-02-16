@@ -180,6 +180,8 @@ function RootLayoutContent() {
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="signup" options={{ animation: 'fade' }} />
         <Stack.Screen name="home" options={{ animation: 'slide_from_right' }} />
+        {/* Chat-Detail Screen: Slide-Animation von rechts (wie bei nativen Messengern) */}
+        <Stack.Screen name="chat/[id]" options={{ animation: 'slide_from_right' }} />
       </Stack>
     </GluestackUIProvider>
   );
