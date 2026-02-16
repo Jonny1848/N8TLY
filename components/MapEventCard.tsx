@@ -32,7 +32,7 @@ const MapEventCard = ({ selectedEvent }: any) => {
     <Pressable
       style={styles.card}
       onPress={() =>
-        router.push(`/events/${selectedEvent.id}`)
+        router.push(`/event/${selectedEvent.id}`)
       }
     >
       {selectedEvent?.image_urls?.[0] && (
