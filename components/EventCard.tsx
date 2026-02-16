@@ -10,11 +10,11 @@ export interface Event {
   host_id: string;
   title: string;
   description: string | null;
-  event_type: string | null;
+  event_type: string;
   music_genres: string[] | null;
   date: string; // ISO Timestamp
   end_date: string | null;
-  image_urls: string[] | null;
+  image_urls: string[] | [];
   ticket_price: number;
   ticket_available: number;
   ticket_sold: number;
@@ -24,7 +24,7 @@ export interface Event {
   status: string | null;
   min_age: number | null;
   max_capacity: number | null;
-  venue_name: string;
+  venue_name: string | null;
   city: string;
   address: string;
   lineup: string[] | null;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle } from 'react-native';
 import { theme } from '../constants/theme';
+import { Avatar } from './Avatar';
 
 interface AvatarStackProps {
     avatars: string[];
@@ -27,19 +28,14 @@ export function AvatarStack({
     return (
         <View style={[styles.container, style]}>
             {visibleAvatars.map((url, index) => (
-                <Image
+                <Avatar
                     key={index}
-                    source={{ uri: url }}
-                    style={[
-                        styles.avatar,
-                        {
-                            width: size,
-                            height: size,
-                            borderRadius: size / 2,
-                            marginLeft: index === 0 ? 0 : spacing,
-                            zIndex: maxVisible + 1 - index, // First picture
-                        },
-                    ]}
+                    url={url}
+                    size={size}
+                    style={{
+                        marginLeft: index === 0 ? 0 : spacing,
+                        zIndex: maxVisible + 1 - index,
+                    }}
                 />
             ))}
 
