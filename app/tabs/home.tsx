@@ -9,6 +9,8 @@ import * as Location from 'expo-location';
 import { useAudioPlayer } from 'expo-audio';
 import { FilterBottomSheet } from '../../components/FilterBottomSheet';
 import { supabase } from '../../lib/supabase'; 
+import { useRouter } from 'expo-router';
+import MapEventCard from '@/components/MapEventCard';
 
 const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
 
@@ -22,11 +24,13 @@ const getMapStyleForHour = (hour: number) =>
   hour >= 6 && hour < 18 ? MAP_STYLE_LIGHT : MAP_STYLE_DARK;
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   // ⭐ Event-States
   const [events, setEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
@@ -136,6 +140,16 @@ export default function HomeScreen() {
     }
   };
 
+  useEffect(() => {
+  if (selectedEvent) {
+    cameraRef.current?.setCamera({
+      centerCoordinate: [selectedEvent.location_lng, selectedEvent.location_lat],
+      zoomLevel: 16,
+      animationDuration: 500,
+    });
+  }
+}, [selectedEvent]);
+
   // ============================
   // Fluggeräusch & Locate Button
   // ============================
@@ -148,7 +162,7 @@ export default function HomeScreen() {
 
   const handleLocatePress = () => {
     if (!userLocation) return;
-    playFlightSound();
+    //playFlightSound();
     cameraRef.current?.setCamera({
       centerCoordinate: [userLocation.longitude, userLocation.latitude],
       zoomLevel: 15,
@@ -171,7 +185,7 @@ export default function HomeScreen() {
 
     const [lng, lat] = data.features[0].center;
 
-    playFlightSound();
+    //playFlightSound();
     cameraRef.current?.setCamera({
       centerCoordinate: [lng, lat],
       zoomLevel: 12,
@@ -193,11 +207,13 @@ export default function HomeScreen() {
         ref={mapRef}
         style={{ flex: 1 }}
         styleURL={mapStyleUrl}
-        onRegionDidChange={handleRegionChange}
+        onMapIdle={handleRegionChange}
         logoEnabled={false}
         attributionEnabled={false}
         compassEnabled={false}
         scaleBarEnabled={false}
+        rotateEnabled={false}
+        onPress={() => setSelectedEvent(null)}
       >
         <MapboxGL.Camera
           ref={cameraRef}
@@ -219,6 +235,7 @@ export default function HomeScreen() {
             key={event.id}
             id={event.id}
             coordinate={[event.location_lng, event.location_lat]}
+            onSelected={() => setSelectedEvent(event)}
           >
             <View className="w-4 h-4 bg-red-500 rounded-full border-2 border-white" />
           </MapboxGL.PointAnnotation>
@@ -246,6 +263,8 @@ export default function HomeScreen() {
           </Pressable>
         </View>
       </SafeAreaView>
+
+      {selectedEvent && <MapEventCard selectedEvent={selectedEvent} />}
 
       {/* Locate Button */}
       <View className="absolute bottom-32 left-5" style={{ zIndex: 10 }}>
