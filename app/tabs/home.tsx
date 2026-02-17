@@ -44,6 +44,18 @@ export default function HomeScreen() {
 
   const BERLIN_COORDS = { latitude: 52.520008, longitude: 13.404954 };
 
+  //Prefetch marker images so they appear immediately
+  // useEffect(() => {
+  //   if (!events?.length) return;
+  //   events.forEach((ev) => {
+  //     const url = ev?.image_urls?.[0];
+  //     if (url) {
+  //       Image.prefetch(url);
+  //     }
+  //   });
+  // }, [events]);
+
+
   // Map-Style: 6am–6pm Light, 6pm–6am Dark
   useEffect(() => {
     const updateStyle = () => {
@@ -123,7 +135,6 @@ export default function HomeScreen() {
     if (error) {
       console.error("RPC Fehler get_events_in_bounds:", error);
     } else {
-      /// console.log("Events aus Supabase:", data);
       setEvents(data ?? []);
     }
   
@@ -144,7 +155,7 @@ export default function HomeScreen() {
   if (selectedEvent) {
     cameraRef.current?.setCamera({
       centerCoordinate: [selectedEvent.location_lng, selectedEvent.location_lat],
-      zoomLevel: 16,
+      zoomLevel: 15,
       animationDuration: 500,
     });
   }
@@ -237,7 +248,23 @@ export default function HomeScreen() {
             coordinate={[event.location_lng, event.location_lat]}
             onSelected={() => setSelectedEvent(event)}
           >
-            <View className="w-4 h-4 bg-red-500 rounded-full border-2 border-white" />
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                overflow: 'hidden',
+                borderWidth: 2,
+                borderColor: 'white',
+                backgroundColor: '#eee',
+              }}
+            >
+              <Image
+                source={{ uri: event.image_urls?.[0] }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            </View>
           </MapboxGL.PointAnnotation>
         ))}
       </MapboxGL.MapView>
