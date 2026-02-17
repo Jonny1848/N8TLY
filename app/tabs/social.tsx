@@ -10,27 +10,28 @@
  */
 import { View, Text, FlatList, Pressable, Image, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { supabase } from '../../lib/supabase';
-import { getConversations, subscribeToChatList, searchUsers } from '../../services/chatService';
 import { MagnifyingGlassIcon } from 'react-native-heroicons/outline';
 import { PencilSquareIcon } from 'react-native-heroicons/outline';
 import { UserIcon } from 'react-native-heroicons/solid';
 import { PlusIcon } from 'react-native-heroicons/solid';
-// Zustand: userId global aus dem Auth-Store lesen (kein getSession() mehr noetig)
+// Zustand: Globale Stores fuer Auth und Chat
 import useAuthStore from '../../stores/useAuthStore';
+import useChatStore from '../../stores/useChatStore';
 
 export default function SocialScreen() {
-  // User-ID aus dem globalen Auth-Store (wird in _layout.tsx gesetzt)
+  // User-ID aus dem globalen Auth-Store
   const userId = useAuthStore((s) => s.userId);
 
-  // Lokaler State fuer Konversationen, Ladezustand und Suche
-  const [conversations, setConversations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Chat-State aus dem globalen Chat-Store
+  const conversations = useChatStore((s) => s.conversations);
+  const loading = useChatStore((s) => s.conversationsLoading);
+  const { loadConversations, subscribeChatList, unsubscribeChatList } = useChatStore();
+
+  // Lokaler State: Nur noch die Suche (rein UI-bezogen)
   const [searchQuery, setSearchQuery] = useState('');
-  const channelRef = useRef<any>(null);
   const router = useRouter();
 
   // ============================
@@ -39,37 +40,17 @@ export default function SocialScreen() {
   useEffect(() => {
     if (!userId) return;
 
-    // Initiales Laden der Chat-Liste
-    loadConversations();
+    // Konversationen ueber den Store laden (cached und global verfuegbar)
+    loadConversations(userId);
 
-    // Realtime-Abo: Aktualisiert die Liste bei neuen Nachrichten
-    channelRef.current = subscribeToChatList(() => {
-      loadConversations();
-    });
+    // Realtime-Abo starten (Store verwaltet den Channel intern)
+    subscribeChatList(userId);
 
-    // Aufraumen beim Verlassen des Screens
+    // Aufraumen beim Unmount
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
+      unsubscribeChatList();
     };
   }, [userId]);
-
-  /**
-   * Laedt alle Konversationen des Users aus Supabase.
-   * Wird sowohl beim initialen Laden als auch bei Realtime-Updates aufgerufen.
-   */
-  const loadConversations = async () => {
-    if (!userId) return;
-    try {
-      const data = await getConversations(userId);
-      setConversations(data);
-    } catch (err) {
-      console.error('Fehler beim Laden der Chats:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * Filtert Konversationen nach Suchbegriff (lokal im State).
@@ -407,8 +388,8 @@ export default function SocialScreen() {
           contentContainerStyle={
             filteredConversations.length === 0 ? { flex: 1 } : { paddingBottom: 20 }
           }
-          // Pull-to-Refresh: Konversationen neu laden
-          onRefresh={loadConversations}
+          // Pull-to-Refresh: Konversationen ueber den Store neu laden
+          onRefresh={() => userId && loadConversations(userId)}
           refreshing={loading}
         />
       )}

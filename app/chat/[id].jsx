@@ -17,17 +17,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-// Zustand: userId global aus dem Auth-Store lesen (kein getSession() mehr noetig)
+// Zustand: Globale Stores fuer Auth und Chat
 import useAuthStore from '../../stores/useAuthStore';
-import {
-  getConversationById,
-  getMessages,
-  sendMessage,
-  sendMediaMessage,
-  subscribeToMessages,
-  unsubscribeFromMessages,
-  markConversationAsRead,
-} from '../../services/chatService';
+import useChatStore from '../../stores/useChatStore';
 import { uploadVoiceMessage } from '../../services/storageService';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { PaperAirplaneIcon, UserIcon, PlayIcon, StopIcon, PauseIcon } from 'react-native-heroicons/solid';
@@ -129,27 +121,40 @@ export default function ChatDetailScreen() {
   const { id: conversationId } = useLocalSearchParams();
   const router = useRouter();
 
-  // User-ID aus dem globalen Auth-Store (wird in _layout.tsx gesetzt)
+  // ============================
+  // Globale Stores: Auth und Chat
+  // ============================
   const userId = useAuthStore((s) => s.userId);
 
-  // State fuer Nachrichten, Konversation und Eingabe
-  const [messages, setMessages] = useState([]);
-  const [conversation, setConversation] = useState(null);
+  // Chat-State aus dem globalen Store (Messages und Konversation)
+  const messages = useChatStore((s) => s.messagesByConversation[conversationId] || []);
+  const conversation = useChatStore((s) => s.activeConversation);
+  const loading = useChatStore((s) => s.messagesLoading[conversationId] ?? true);
+
+  // Chat-Actions aus dem Store
+  const {
+    loadMessages,
+    loadConversationDetails,
+    sendTextMessage,
+    sendMediaMessage: storeSendMediaMessage,
+    markAsRead,
+    subscribeMessages,
+    unsubscribeMessages,
+    clearActiveConversation,
+  } = useChatStore();
+
+  // ============================
+  // Lokaler UI-State (bleibt lokal – rein Screen-bezogen)
+  // ============================
   const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-
-  // Refs fuer FlatList-Scrolling und Realtime-Channel
   const flatListRef = useRef(null);
-  const channelRef = useRef(null);
 
-  // State und Animation fuer das "Share Content" Bottom Sheet
+  // Share Content Bottom Sheet
   const [shareSheetVisible, setShareSheetVisible] = useState(false);
   const shareSheetAnim = useRef(new Animated.Value(0)).current;
 
-  // ============================
   // Sprachnachrichten: Aufnahme-States und Hooks
-  // ============================
   const [recording, setRecording] = useState(false);
   const [recordedUri, setRecordedUri] = useState(null);
   const [uploadingVoice, setUploadingVoice] = useState(false);
@@ -174,68 +179,27 @@ export default function ChatDetailScreen() {
   };
 
   // ============================
-  // Initialisierung: User, Chat-Daten und Realtime
+  // Initialisierung: Chat-Daten laden und Realtime abonnieren
+  // Alles ueber den Chat-Store (keine direkten Service-Aufrufe mehr)
   // ============================
   useEffect(() => {
-    let mounted = true;
+    if (!userId || !conversationId) return;
 
-    const init = async () => {
-      // userId kommt jetzt aus dem globalen Auth-Store (kein getSession() noetig)
-      if (!userId || !mounted) return;
-      const uid = userId;
+    // Konversation, Nachrichten und Realtime parallel starten
+    loadConversationDetails(conversationId, userId);
+    loadMessages(conversationId);
+    markAsRead(conversationId, userId);
+    subscribeMessages(conversationId, userId);
 
-      // Konversation laden (fuer Header-Infos)
-      const conv = await getConversationById(conversationId);
-      if (mounted && conv) {
-        // Bei Einzelchats: Namen und Avatar des Chat-Partners ermitteln
-        if (conv.type === 'direct') {
-          const other = conv.conversation_participants?.find((p) => p.user_id !== uid);
-          conv.displayName = other?.profiles?.username || 'Unbekannt';
-          conv.displayAvatar = other?.profiles?.avatar_url || null;
-        } else {
-          conv.displayName = conv.name || 'Gruppe';
-          conv.displayAvatar = conv.avatar_url || null;
-        }
-        setConversation(conv);
-      }
-
-      // Nachrichten laden (neueste zuerst, FlatList ist inverted)
-      const msgs = await getMessages(conversationId, 50, 0);
-      if (mounted) setMessages(msgs);
-      setLoading(false);
-
-      // Chat als gelesen markieren
-      await markConversationAsRead(conversationId, uid);
-
-      // Realtime-Abo: Neue Nachrichten sofort anzeigen
-      channelRef.current = subscribeToMessages(conversationId, (newMsg) => {
-        if (!mounted) return;
-        setMessages((prev) => {
-          // Duplikate vermeiden (falls Message schon durch sendMessage hinzugefuegt)
-          if (prev.some((m) => m.id === newMsg.id)) return prev;
-          return [newMsg, ...prev]; // Vorne einfuegen (neueste zuerst)
-        });
-
-        // Nachricht als gelesen markieren wenn von anderem User
-        if (newMsg.sender_id !== uid) {
-          markConversationAsRead(conversationId, uid);
-        }
-      });
-    };
-
-    init();
-
-    // Aufraemen: Realtime-Abo entfernen beim Verlassen
+    // Aufraemen: Realtime-Abo und aktive Konversation zuruecksetzen
     return () => {
-      mounted = false;
-      if (channelRef.current) {
-        unsubscribeFromMessages(channelRef.current);
-      }
+      unsubscribeMessages(conversationId);
+      clearActiveConversation();
     };
   }, [conversationId, userId]);
 
   // ============================
-  // Nachricht senden
+  // Nachricht senden (ueber den Chat-Store)
   // ============================
   const handleSend = async () => {
     const text = inputText.trim();
@@ -245,13 +209,8 @@ export default function ChatDetailScreen() {
     setInputText(''); // Eingabefeld sofort leeren (optimistic UI)
 
     try {
-      const msg = await sendMessage(conversationId, userId, text);
-
-      // Nachricht lokal hinzufuegen (optimistic – Realtime liefert evtl. auch)
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
-        return [{ ...msg, profiles: { id: userId } }, ...prev];
-      });
+      // Store kuemmert sich um API-Call + optimistisches Hinzufuegen
+      await sendTextMessage(conversationId, userId, text);
     } catch (err) {
       console.error('Fehler beim Senden:', err);
       // Bei Fehler: Text wiederherstellen
@@ -310,7 +269,7 @@ export default function ChatDetailScreen() {
   };
 
   // ============================
-  // Sprachnachricht: Hochladen und als Nachricht senden
+  // Sprachnachricht: Hochladen und als Nachricht senden (ueber den Store)
   // ============================
   const handleSendVoice = async () => {
     const uri = recordedUri || audioRecorder.uri;
@@ -320,14 +279,9 @@ export default function ChatDetailScreen() {
     try {
       // 1. Audio-Datei zu Supabase Storage hochladen
       const publicUrl = await uploadVoiceMessage(conversationId, uri, 'audio/m4a');
-      // 2. Nachricht mit media_url und Typ 'voice' in der DB speichern
-      const msg = await sendMediaMessage(conversationId, userId, publicUrl, 'voice');
-      // 3. Lokal hinzufuegen (optimistic UI)
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
-        return [{ ...msg, profiles: { id: userId } }, ...prev];
-      });
-      // 4. State zuruecksetzen
+      // 2. Store: Nachricht senden + optimistisch zum Cache hinzufuegen
+      await storeSendMediaMessage(conversationId, userId, publicUrl, 'voice');
+      // 3. State zuruecksetzen
       setRecordedUri(null);
       setRecording(false);
     } catch (err) {
