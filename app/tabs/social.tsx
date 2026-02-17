@@ -19,28 +19,19 @@ import { MagnifyingGlassIcon } from 'react-native-heroicons/outline';
 import { PencilSquareIcon } from 'react-native-heroicons/outline';
 import { UserIcon } from 'react-native-heroicons/solid';
 import { PlusIcon } from 'react-native-heroicons/solid';
+// Zustand: userId global aus dem Auth-Store lesen (kein getSession() mehr noetig)
+import useAuthStore from '../../stores/useAuthStore';
 
 export default function SocialScreen() {
-  // State fuer Konversationen, Ladezustand und Suche
+  // User-ID aus dem globalen Auth-Store (wird in _layout.tsx gesetzt)
+  const userId = useAuthStore((s) => s.userId);
+
+  // Lokaler State fuer Konversationen, Ladezustand und Suche
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [userId, setUserId] = useState<string | null>(null);
   const channelRef = useRef<any>(null);
   const router = useRouter();
-
-  // ============================
-  // Aktuellen User ermitteln
-  // ============================
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.id) {
-        setUserId(session.user.id);
-      }
-    };
-    getUser();
-  }, []);
 
   // ============================
   // Konversationen laden und Realtime abonnieren

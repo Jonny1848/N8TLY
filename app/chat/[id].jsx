@@ -17,7 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { supabase } from '../../lib/supabase';
+// Zustand: userId global aus dem Auth-Store lesen (kein getSession() mehr noetig)
+import useAuthStore from '../../stores/useAuthStore';
 import {
   getConversationById,
   getMessages,
@@ -128,11 +129,13 @@ export default function ChatDetailScreen() {
   const { id: conversationId } = useLocalSearchParams();
   const router = useRouter();
 
+  // User-ID aus dem globalen Auth-Store (wird in _layout.tsx gesetzt)
+  const userId = useAuthStore((s) => s.userId);
+
   // State fuer Nachrichten, Konversation und Eingabe
   const [messages, setMessages] = useState([]);
   const [conversation, setConversation] = useState(null);
   const [inputText, setInputText] = useState('');
-  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -177,11 +180,9 @@ export default function ChatDetailScreen() {
     let mounted = true;
 
     const init = async () => {
-      // Aktuellen User ermitteln
-      const { data: { session } } = await supabase.auth.getSession();
-      const uid = session?.user?.id;
-      if (!uid || !mounted) return;
-      setUserId(uid);
+      // userId kommt jetzt aus dem globalen Auth-Store (kein getSession() noetig)
+      if (!userId || !mounted) return;
+      const uid = userId;
 
       // Konversation laden (fuer Header-Infos)
       const conv = await getConversationById(conversationId);
@@ -231,7 +232,7 @@ export default function ChatDetailScreen() {
         unsubscribeFromMessages(channelRef.current);
       }
     };
-  }, [conversationId]);
+  }, [conversationId, userId]);
 
   // ============================
   // Nachricht senden
