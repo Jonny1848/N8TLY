@@ -9,7 +9,6 @@ export function useFilteredEvents() {
 
     const filteredEvents = useMemo(() => {
         if (!events) return [];
-        console.log("Full Event Object:", JSON.stringify(events[0], null, 2));
 
         return events.filter((event) => {
             const matchesEventType =
