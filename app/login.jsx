@@ -4,16 +4,17 @@
  * Google OAuth: signInWithOAuth → WebBrowser → setSession → fetchProfileWithToken → Redirect
  * Apple (iOS): expo-apple-authentication → signInWithIdToken → fetchProfileWithToken → Redirect
  */
-import { View, Text, Pressable, Image, ActivityIndicator, ScrollView, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { View, Text, Pressable, Image, ActivityIndicator, ScrollView, TextInput, TouchableOpacity, Platform } from "react-native";
 import { useState } from "react";
 import { useRouter, Redirect } from 'expo-router';
 import { supabase } from "../lib/supabase";
 import { useOAuthHandlers } from "./hooks/useOAuthHandlers";
-import { theme } from "../constants/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { EnvelopeIcon } from "react-native-heroicons/outline";
-import { EyeIcon, EyeSlashIcon } from "react-native-heroicons/outline";
-import { CheckIcon } from "react-native-heroicons/solid";
+import AuthErrorBanner from "../components/auth/AuthErrorBanner";
+import AuthSubmitButton from "../components/auth/AuthSubmitButton";
+import AuthEmailInput from "../components/auth/AuthEmailInput";
+import AuthPasswordInput from "../components/auth/AuthPasswordInput";
+import { theme } from "../constants/theme";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -42,9 +43,9 @@ export default function Login() {
   // OAuth-Overlay: Login-Form verstecken, bis Weiterleitung – verhindert kurzes Aufblitzen des Login-Screens
   if (oauthProcessing) {
     return (
-      <View style={styles.oauthOverlay}>
+      <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color={theme.colors.primary.main} />
-        <Text style={styles.oauthOverlayText}>Anmeldung wird verarbeitet...</Text>
+        <Text className="mt-4 text-gray-700 text-base">Anmeldung wird verarbeitet...</Text>
       </View>
     );
   }
@@ -108,11 +109,11 @@ export default function Login() {
           </View>
 
           {/* Welcome Text */}
-          <View className="mb-8 items-center justify-center" style={{ alignItems: 'center' }}>
-            <Text className="text-3xl font-bold text-black mb-2" style={{ textAlign: 'center', fontFamily: 'Manrope_700Bold' }}>
+          <View className="mb-8 items-center justify-center">
+            <Text className="text-3xl font-bold text-black mb-2 text-center">
               Willkommen zurück
             </Text>
-            <Text className="text-base text-gray-500" style={{ textAlign: 'center', fontFamily: 'Manrope_400Regular' }}>
+            <Text className="text-base text-gray-500 text-center">
               Schön, dich wiederzusehen
             </Text>
           </View>
@@ -123,7 +124,7 @@ export default function Login() {
               onPress={() => setActiveTab("signin")}
               className={`flex-1 py-3 rounded-lg ${activeTab === "signin" ? "bg-white" : ""}`}
             >
-              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`} style={{ fontFamily: 'Manrope_600SemiBold' }}>
+              <Text className={`text-center font-semibold ${activeTab === "signin" ? "text-black" : "text-gray-500"}`}>
                 Anmelden
               </Text>
             </Pressable>
@@ -138,89 +139,21 @@ export default function Login() {
           </View>
 
           {/* Email Input */}
-          <View className="mb-4">
-            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-white" style={{ minHeight: 56, paddingVertical: 16 }}>
-              <EnvelopeIcon size={20} color={theme.colors.neutral.gray[500]} />
-              <TextInput
-                className="flex-1 ml-3 text-base text-black"
-                placeholder="E-Mail Adresse"
-                placeholderTextColor={theme.colors.neutral.gray[400]}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={{ paddingVertical: 0, lineHeight: 20 }}
-              />
-              {emailValid && email.length > 0 && (
-                <CheckIcon size={20} color={theme.colors.success} />
-              )}
-            </View>
-            {submitted && !emailValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{}}>
-                Bitte gebe eine gültige Email ein.
-              </Text>
-            )}
-          </View>
+          <AuthEmailInput email={email} setEmail={setEmail} emailValid={emailValid} submitted={submitted} />
 
           {/* Password Input */}
-          <View className="mb-6">
-            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-white" style={{ minHeight: 56, paddingVertical: 16 }}>
-              <TextInput
-                className="flex-1 text-base text-black"
-                placeholder="Passwort"
-                placeholderTextColor={theme.colors.neutral.gray[400]}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                style={{ paddingVertical: 0, lineHeight: 20 }}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                {showPassword ? (
-                  <EyeSlashIcon size={20} color={theme.colors.neutral.gray[500]} />
-                ) : (
-                  <EyeIcon size={20} color={theme.colors.neutral.gray[500]} />
-                )}
-              </TouchableOpacity>
-            </View>
-            {submitted && !passwordValid && (
-              <Text className="text-red-500 text-sm mt-1 ml-1" style={{ fontFamily: 'Manrope_400Regular' }}>
-                Passwort muss mindestens 6 Zeichen lang sein.
-              </Text>
-            )}
-          </View>
+          <AuthPasswordInput password={password} setPassword={setPassword} passwordValid={passwordValid} submitted={submitted} showPassword={showPassword} setShowPassword={setShowPassword} />
 
           {/* Error Message */}
-          {errorMsg && (
-            <View className="mb-4 p-3 bg-red-50 rounded-xl border border-red-200">
-              <Text className="text-red-600 text-sm" style={{ fontFamily: 'Manrope_400Regular' }}>{errorMsg}</Text>
-            </View>
-          )}
+          <AuthErrorBanner message={errorMsg} className="mb-4" />
 
           {/* Continue Button */}
-          <Pressable
-            onPress={handleSubmit}
-            disabled={loading}
-            className={`py-4 rounded-xl mb-6 ${loading ? "opacity-50" : ""}`}
-            style={{ backgroundColor: theme.colors.primary.main }}
-          >
-            {loading ? (
-              <View className="flex-row items-center justify-center">
-                <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-white font-semibold text-center ml-2" style={{ fontFamily: 'Manrope_600SemiBold' }}>
-                  Wird geladen...
-                </Text>
-              </View>
-            ) : (
-              <Text className="text-white font-semibold text-center text-base" style={{ fontFamily: 'Manrope_600SemiBold' }}>
-                Weiter
-              </Text>
-            )}
-          </Pressable>
+          <AuthSubmitButton title="Anmelden" onPress={handleSubmit} disabled={loading} loading={loading} />
 
           {/* Or Continue With */}
           <View className="flex-row items-center mb-6">
             <View className="flex-1 h-px bg-gray-300" />
-            <Text className="mx-4 text-gray-500 text-sm" style={{ fontFamily: 'Manrope_400Regular' }}>Oder weiter mit</Text>
+            <Text className="mx-4 text-gray-500 text-sm">Oder weiter mit</Text>
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 
@@ -245,29 +178,10 @@ export default function Login() {
             )}
           </View>
 
-          {/* Bottom Text */}
-          <View className="mt-auto">
-            <Text className="text-gray-500 text-sm leading-5" style={{}}>
-              
-            </Text>
-          </View>
+          {/* Bottom Spacer */}
+          <View className="mt-auto" />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  oauthOverlay: {
-    flex: 1,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  oauthOverlayText: {
-    marginTop: 16,
-    color: theme.colors.neutral.gray[700],
-    fontSize: 16,
-    fontFamily: 'Manrope_400Regular',
-  },
-});
