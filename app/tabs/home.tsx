@@ -9,6 +9,8 @@ import * as Location from 'expo-location';
 import { useAudioPlayer } from 'expo-audio';
 import { FilterBottomSheet } from '../../components/FilterBottomSheet';
 import { supabase } from '../../lib/supabase'; 
+import { useGeneralStore } from '../store/generalStore';
+import { useEventStore } from '../store/eventStore';
 
 const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
 
@@ -22,14 +24,10 @@ const getMapStyleForHour = (hour: number) =>
   hour >= 6 && hour < 18 ? MAP_STYLE_LIGHT : MAP_STYLE_DARK;
 
 export default function HomeScreen() {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  // Zustand Stores
+  const { searchQuery, setSearchQuery, userLocation, setUserLocation } = useGeneralStore();
+  const { events, setEvents, loadingEvents, setLoadingEvents, filterVisible, setFilterVisible } = useEventStore();
 
-  // ⭐ Event-States
-  const [events, setEvents] = useState<any[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterVisible, setFilterVisible] = useState(false);
   const [mapStyleUrl, setMapStyleUrl] = useState(() =>
     getMapStyleForHour(new Date().getHours())
   );
