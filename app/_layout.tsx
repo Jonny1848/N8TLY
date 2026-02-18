@@ -179,7 +179,6 @@ function RootLayoutContent() {
         <Stack.Screen name="tabs" options={{ animation: 'fade' }} />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="signup" options={{ animation: 'fade' }} />
-        <Stack.Screen name="home" options={{ animation: 'slide_from_right' }} />
       </Stack>
     </GluestackUIProvider>
   );
