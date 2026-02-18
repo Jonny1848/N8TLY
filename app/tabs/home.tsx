@@ -12,6 +12,8 @@ import { supabase } from '../../lib/supabase';
 import { useGeneralStore } from '../store/generalStore';
 import { useEventStore } from '../store/eventStore';
 import MapEventCard from '@/components/home/MapEventCard';
+import { useFilterStore } from '../store/filterStore';
+import { useFilteredEvents } from '../../hooks/useFilteredEvents';
 
 const MAPBOX_ACCESS_TOKEN = "sk.eyJ1Ijoiam9ubnkyMDA1IiwiYSI6ImNtZ3R0MDVwODA3MTMyanI3eTRiM2k0bHEifQ.JDKw4aOqKw_UNLKok4gvOQ";
 
@@ -27,7 +29,9 @@ const getMapStyleForHour = (hour: number) =>
 export default function HomeScreen() {
   // Zustand Stores
   const { searchQuery, setSearchQuery, userLocation, setUserLocation } = useGeneralStore();
-  const { events, setEvents, loadingEvents, setLoadingEvents, filterVisible, setFilterVisible } = useEventStore();
+  const { events, setEvents, loadingEvents, setLoadingEvents, selectedEvent, setSelectedEvent } = useEventStore();
+  const { filterVisible, setFilterVisible } = useFilterStore();
+  const filteredEvents = useFilteredEvents();
 
   const [mapStyleUrl, setMapStyleUrl] = useState(() =>
     getMapStyleForHour(new Date().getHours())
@@ -237,7 +241,7 @@ export default function HomeScreen() {
         <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true} />
 
         {/* ⭐ EVENT MARKER */}
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <MapboxGL.MarkerView
             key={event.id}
             id={event.id}
